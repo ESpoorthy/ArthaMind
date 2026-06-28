@@ -1,14 +1,26 @@
-/**
- * CustomerPortal — banking dashboard, transactions, cards, loans, AI chat.
- * Full implementation in Phase 8.
- */
+import { Routes, Route, Navigate } from 'react-router-dom';
+import CustomerLayout from '../../components/layout/CustomerLayout';
+import Dashboard from './Dashboard';
+import Accounts from './Accounts';
+import Cards from './Cards';
+import Loans from './Loans';
+import FixedDeposits from './FixedDeposits';
+import AIChat from './AIChat';
+import Notifications from './Notifications';
+
 export default function CustomerPortal() {
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
-      <div className="card p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-900">Customer Portal</h2>
-        <p className="mt-2 text-sm text-gray-500">Full implementation — Phase 8</p>
-      </div>
-    </div>
+    <Routes>
+      <Route element={<CustomerLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="accounts" element={<Accounts />} />
+        <Route path="cards" element={<Cards />} />
+        <Route path="loans" element={<Loans />} />
+        <Route path="fd" element={<FixedDeposits />} />
+        <Route path="chat" element={<AIChat />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Route>
+    </Routes>
   );
 }

@@ -1,19 +1,14 @@
-// Re-export shared types for convenience inside the frontend
-export type {
-  Account,
-  Transaction,
-  Card,
-  Loan,
-  FixedDeposit,
-  Notification,
-  ChatMessage,
-  ChatSession,
-  AgentResponse,
-  SupportTicket,
-  AuthTokens,
-  UserSession,
-  UserRole,
-  PaginatedResponse,
-  ApiResponse,
-  ApiError,
-} from '@arthamind/shared';
+// Frontend-local types (shared package auth types deferred to Phase 2)
+export type UserRole = 'customer' | 'agent' | 'manager';
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface UserSession {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}

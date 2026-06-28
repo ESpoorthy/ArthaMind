@@ -1,24 +1,70 @@
-/**
- * LoginPage — entry point for all three user roles.
- * Full implementation in Phase 8.
- */
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../store/authStore';
+import { Building2, UserCircle, Headphones, BarChart3 } from 'lucide-react';
+
 export default function LoginPage() {
+  const { login } = useAuth();
+  const nav = useNavigate();
+
+  const handle = (role: 'customer' | 'agent' | 'manager', path: string) => {
+    login(role); nav(path);
+  };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-brand-950 to-brand-700 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-600">
-            <span className="text-2xl font-bold text-white">A</span>
+        <div className="text-center mb-8">
+          <div className="mx-auto w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-xl">
+            <Building2 className="w-9 h-9 text-blue-700" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">ArthaMind</h1>
-          <p className="mt-1 text-sm text-gray-500">AI Banking Simulator</p>
+          <h1 className="text-3xl font-bold text-white">ArthaMind</h1>
+          <p className="text-blue-200 mt-1">Agentic AI Banking Simulator</p>
+          <p className="text-blue-300 text-xs mt-1">SBI Hackathon 2026</p>
         </div>
 
-        {/* Placeholder — wired up in Phase 8 */}
-        <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-center text-sm text-brand-700">
-          Authentication UI — Phase 8
+        {/* Demo Login Cards */}
+        <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
+          <p className="text-white text-center text-sm font-medium mb-5">Select a demo portal to explore</p>
+          <div className="space-y-3">
+            <button onClick={() => handle('customer', '/dashboard')}
+              className="w-full bg-white text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-blue-50 transition-all shadow font-medium">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <UserCircle className="w-6 h-6 text-blue-700" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold">Customer Portal</p>
+                <p className="text-xs text-gray-500">Priya Sharma · Savings Account</p>
+              </div>
+            </button>
+
+            <button onClick={() => handle('agent', '/agent')}
+              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium">
+              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <Headphones className="w-6 h-6 text-green-700" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold">Human Agent Portal</p>
+                <p className="text-xs text-gray-500">Ravi Kumar · Support Agent</p>
+              </div>
+            </button>
+
+            <button onClick={() => handle('manager', '/manager')}
+              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium">
+              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-purple-700" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold">Manager Dashboard</p>
+                <p className="text-xs text-gray-500">Anita Verma · Branch Manager</p>
+              </div>
+            </button>
+          </div>
         </div>
+
+        <p className="text-center text-blue-300 text-xs mt-6">
+          Powered by Gemini 2.5 Flash · LangGraph Multi-Agent Architecture
+        </p>
       </div>
     </div>
   );
