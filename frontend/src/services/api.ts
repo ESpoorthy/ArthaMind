@@ -1,5 +1,10 @@
 import axios, { type AxiosInstance, type AxiosError } from 'axios';
-import type { ApiError } from '@arthamind/shared';
+
+interface ApiError {
+  message: string;
+  code?: string;
+  details?: unknown;
+}
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 

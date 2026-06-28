@@ -16,12 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"],
-      "@arthamind/shared": ["../../shared/src/index.ts"]
-    },
-    "types": ["vitest/globals"]
+    "paths": { "@/*": ["./*"] }
   },
   "include": ["src", "tests"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["node_modules", "dist", "../shared"]
 }
