@@ -17,7 +17,8 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@arthamind/shared": ["../../shared/src/index.ts"]
     },
     "types": ["vitest/globals"]
   },
