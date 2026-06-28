@@ -1,0 +1,55 @@
+version: '3.9'
+
+# =============================================================================
+# ArthaMind — Docker Compose (Testing / CI)
+# Usage: docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+# =============================================================================
+
+networks:
+  test-net:
+    driver: bridge
+
+volumes:
+  test_postgres_data:
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: arthamind-postgres-test
+    environment:
+      POSTGRES_DB: arthamind_test
+      POSTGRES_USER: arthamind_test
+      POSTGRES_PASSWORD: test_secret
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    networks:
+      - test-net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U arthamind_test']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: arthamind-redis-test
+    networks:
+      - test-net
+
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: arthamind-backend-test
+    environment:
+      DATABASE_URL: postgresql+asyncpg://arthamind_test:test_secret@postgres-test:5432/arthamind_test
+      REDIS_URL: redis://redis-test:6379/0
+      ENVIRONMENT: test
+      SECRET_KEY: test_secret_key_for_ci_only
+    networks:
+      - test-net
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: ['python', '-m', 'pytest', 'tests/', '-v', '--no-header', '-x']

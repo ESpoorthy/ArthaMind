@@ -1,0 +1,19 @@
+{
+  "name": "@arthamind/backend",
+  "version": "1.0.0",
+  "description": "ArthaMind Backend API Service (FastAPI/Python)",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --port 8000 --host 0.0.0.0",
+    "start": "uvicorn src.main:app --port 8000 --host 0.0.0.0",
+    "test": "python -m pytest tests/ -v --no-header",
+    "test:coverage": "python -m pytest tests/ --cov=src --cov-report=html",
+    "lint": "flake8 src/ tests/ && mypy src/",
+    "format": "black src/ tests/ && isort src/ tests/",
+    "install:deps": "pip install -r requirements.txt",
+    "install:dev": "pip install -r requirements-dev.txt"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

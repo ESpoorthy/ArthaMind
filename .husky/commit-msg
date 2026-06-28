@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Enforce conventional commit format
+commit_regex='^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?: .{1,100}'
+commit_msg=$(cat "$1")
+
+if ! echo "$commit_msg" | grep -qE "$commit_regex"; then
+  echo ""
+  echo "ERROR: Commit message does not follow Conventional Commits format."
+  echo "Expected: <type>(<scope>): <description>"
+  echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
+  echo ""
+  echo "Your message: $commit_msg"
+  exit 1
+fi

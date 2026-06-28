@@ -1,0 +1,146 @@
+version: '3.9'
+
+# =============================================================================
+# ArthaMind AI Banking Simulator — Docker Compose (Development)
+# =============================================================================
+
+networks:
+  arthamind-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  chromadb_data:
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — primary relational database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: arthamind-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-arthamind}
+      POSTGRES_USER: ${POSTGRES_USER:-arthamind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-arthamind_secret}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    networks:
+      - arthamind-net
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-arthamind} -d ${POSTGRES_DB:-arthamind}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Redis — caching and session store
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: arthamind-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_secret} --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    networks:
+      - arthamind-net
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--pass', '${REDIS_PASSWORD:-redis_secret}', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # ChromaDB — vector database for RAG
+  # ---------------------------------------------------------------------------
+  chromadb:
+    image: chromadb/chroma:0.4.24
+    container_name: arthamind-chromadb
+    restart: unless-stopped
+    environment:
+      CHROMA_SERVER_AUTH_CREDENTIALS_FILE: ''
+      ANONYMIZED_TELEMETRY: 'false'
+      ALLOW_RESET: 'true'
+    volumes:
+      - chromadb_data:/chroma/chroma
+    ports:
+      - '${CHROMADB_PORT:-8001}:8000'
+    networks:
+      - arthamind-net
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/api/v1/heartbeat']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # Backend — FastAPI application
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: arthamind-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-arthamind}:${POSTGRES_PASSWORD:-arthamind_secret}@postgres:5432/${POSTGRES_DB:-arthamind}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secret}@redis:6379/0
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: '8000'
+    volumes:
+      - ./backend:/app
+    ports:
+      - '${BACKEND_PORT:-8000}:8000'
+    networks:
+      - arthamind-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React / Vite dev server
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: arthamind-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-8000}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - '${FRONTEND_PORT:-5173}:5173'
+    networks:
+      - arthamind-net
+    depends_on:
+      - backend

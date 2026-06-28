@@ -1,0 +1,237 @@
+name: CI — Lint, Test & Build
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'fix/**']
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================================
+  # Backend — lint + type-check + test
+  # ============================================================
+  backend-quality:
+    name: Backend Quality
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: arthamind_test
+          POSTGRES_USER: arthamind_test
+          POSTGRES_PASSWORD: test_secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint with flake8
+        run: flake8 src/ tests/ --max-line-length=100 --extend-ignore=E203,W503
+
+      - name: Format check with black
+        run: black --check src/ tests/
+
+      - name: Import order check with isort
+        run: isort --check-only src/ tests/
+
+      - name: Type check with mypy
+        run: mypy src/ --ignore-missing-imports
+
+      - name: Run tests with coverage
+        env:
+          ENVIRONMENT: test
+          DATABASE_URL: postgresql+asyncpg://arthamind_test:test_secret@localhost:5432/arthamind_test
+          REDIS_URL: redis://localhost:6379/1
+          SECRET_KEY: test_secret_key_minimum_32_chars_long_ci
+          REFRESH_SECRET_KEY: test_refresh_key_minimum_32_chars_long_ci
+          GEMINI_API_KEY: test_key
+        run: |
+          python -m pytest tests/ -v \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            --no-header \
+            -x
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: backend/coverage.xml
+          flags: backend
+          fail_ci_if_error: false
+
+  # ============================================================
+  # Frontend — lint + type-check + test + build
+  # ============================================================
+  frontend-quality:
+    name: Frontend Quality
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: .
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npx vitest run --coverage
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: http://localhost:8000
+          VITE_WS_BASE_URL: ws://localhost:8000
+          VITE_APP_NAME: ArthaMind
+          VITE_APP_VERSION: 1.0.0
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: frontend/coverage/coverage-final.json
+          flags: frontend
+          fail_ci_if_error: false
+
+  # ============================================================
+  # Shared package — build
+  # ============================================================
+  shared-build:
+    name: Shared Package Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build shared
+        run: npm run build:shared
+
+  # ============================================================
+  # Security scan
+  # ============================================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [backend-quality, frontend-quality]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Python dependency vulnerability scan (pip-audit)
+        run: |
+          pip install pip-audit
+          pip-audit -r backend/requirements.txt --ignore-vuln PYSEC-2022-42969 || true
+
+      - name: Node dependency vulnerability scan
+        run: npm audit --audit-level=high || true
+
+      - name: Scan for secrets (truffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+        continue-on-error: true
+
+  # ============================================================
+  # Docker build validation
+  # ============================================================
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: [backend-quality, frontend-quality]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: false
+          target: production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: false
+          target: production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

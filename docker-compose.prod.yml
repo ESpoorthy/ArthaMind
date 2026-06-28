@@ -1,0 +1,36 @@
+version: '3.9'
+
+# =============================================================================
+# ArthaMind AI Banking Simulator — Docker Compose (Production override)
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# =============================================================================
+
+services:
+  backend:
+    build:
+      target: production
+    restart: always
+    volumes: []   # No source mounts in production
+    environment:
+      ENVIRONMENT: production
+
+  frontend:
+    build:
+      target: production
+    restart: always
+    volumes: []
+    ports:
+      - '80:80'
+      - '443:443'
+
+  postgres:
+    restart: always
+
+  redis:
+    restart: always
+
+  chromadb:
+    restart: always
+    environment:
+      ANONYMIZED_TELEMETRY: 'false'
+      ALLOW_RESET: 'false'

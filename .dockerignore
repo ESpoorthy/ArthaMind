@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log*
+.npm
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.eggs
+venv/
+.venv/
+env/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+.pytest_cache/
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.sw?
+
+# Kiro
+.kiro/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker local data
+docker/data/
