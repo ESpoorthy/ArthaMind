@@ -1,823 +1,454 @@
-# ArthaMind AI Banking Simulator - Technical Design
+# ArthaMind Advanced AI Features - Technical Design
 
-## System Overview
+## Overview
 
-ArthaMind is a comprehensive AI-powered banking simulator built using modern cloud-native architecture. The system demonstrates advanced AI banking capabilities through a multi-agent architecture powered by LangGraph and Gemini 2.5 Flash, providing realistic banking experiences without real financial integrations.
-
-### Core Architecture Principles
-
-- **Microservices Architecture**: Loosely coupled services with clear boundaries
-- **AI-First Design**: Multi-agent system handling specialized banking domains  
-- **Event-Driven Communication**: Asynchronous messaging between components
-- **Cloud-Native**: Containerized services with horizontal scalability
-- **Security by Design**: End-to-end encryption and zero-trust security model
-- **Simulation-Based**: Safe testing environment with synthetic banking data
-
-### Technology Stack
-
-- **Frontend**: React 18 with TypeScript, Tailwind CSS, React Query
-- **Backend**: Node.js with Express, TypeScript, Prisma ORM
-- **AI Platform**: LangGraph for multi-agent orchestration, Gemini 2.5 Flash LLM
-- **Database**: PostgreSQL for transactional data, ChromaDB for vector storage
-- **Authentication**: JWT with refresh tokens, bcrypt for password hashing  
-- **Communication**: WebSocket for real-time updates, Redis for caching
-- **Infrastructure**: Docker containers, NGINX reverse proxy
-- **Voice Processing**: Web Speech API, Azure Speech Services
-- **Document Processing**: Tesseract OCR, PDF.js for document handling
+This document outlines the technical design for ArthaMind's Advanced AI features, including the Gamification System, AI Fraud Awareness, Life Event Recommendations, and Behavioral Intelligence. The design integrates seamlessly with the existing LangGraph multi-agent architecture while adding new specialized agents and services.
 
 ## System Architecture
 
-### High-Level Architecture Diagram
+### High-Level Architecture
 
 ```
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│  Customer       │  │  Human Agent    │  │  Manager        │
-│  Portal         │  │  Portal         │  │  Dashboard      │
-└─────────────────┘  └─────────────────┘  └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-              ┌──────────────────────────────────────┐
-              │         API Gateway                  │
-              │      (Authentication & Routing)      │
-              └──────────────────────────────────────┘
-                                 │
-         ┌───────────────────────┼───────────────────────┐
-         │                       │                       │
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│  Customer       │  │  Agent          │  │  Analytics      │
-│  Service        │  │  Orchestration  │  │  Service        │
-│                 │  │  (LangGraph)    │  │                 │
-└─────────────────┘  └─────────────────┘  └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-              ┌──────────────────────────────────────┐
-              │           Data Layer                 │
-              │  PostgreSQL | ChromaDB | Redis      │
-              └──────────────────────────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   API Gateway   │    │   AI Agents     │
+│  React + TS     │◄──►│   FastAPI       │◄──►│   LangGraph     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                       ┌─────────────────┐
+                       │   Data Layer    │
+                       │ PostgreSQL +    │
+                       │   ChromaDB      │
+                       └─────────────────┘
 ```
 
-### Core Services Architecture
+### Core Components Integration
 
-#### 1. API Gateway Service
-- **Purpose**: Single entry point for all client requests
-- **Responsibilities**: Authentication, routing, rate limiting, CORS
-- **Technology**: Express.js with helmet and express-rate-limit
-- **Scalability**: Stateless design with horizontal scaling
+The advanced features integrate with existing components:
 
-#### 2. Customer Service  
-- **Purpose**: Manages customer data and banking operations
-- **Responsibilities**: Account management, transactions, card operations
-- **Database**: PostgreSQL with optimized indexes for banking queries
-- **Caching**: Redis for frequently accessed account data
+- **Router Agent**: Enhanced to handle gamification, life events, and behavioral queries
+- **Memory Agent**: Extended to track behavioral patterns and engagement metrics
+- **Fraud Agent**: Upgraded with educational components and prevention guidance
+- **Investment Agent**: Enhanced with life event-based recommendations
 
-#### 3. AI Agent Orchestration Service
-- **Purpose**: Coordinates multi-agent AI workflows using LangGraph
-- **Responsibilities**: Intent routing, agent coordination, context management  
-- **Technology**: LangGraph with Gemini 2.5 Flash integration
-- **Architecture**: Event-driven agent communication with state management
+## New Agent Architecture
 
-#### 4. Analytics Service
-- **Purpose**: Real-time analytics and reporting for management dashboards
-- **Responsibilities**: Performance metrics, fraud detection, business intelligence
-- **Technology**: Time-series data processing with aggregation pipelines
-- **Storage**: Specialized analytics tables with materialized views
+### 1. Gamification Agent
 
-#### 5. Notification Service  
-- **Purpose**: Multi-channel notification delivery
-- **Responsibilities**: Email, SMS, push notifications, delivery tracking
-- **Technology**: Queue-based processing with retry mechanisms
-- **Integrations**: SMTP, SMS gateway, WebSocket for real-time updates
+**Purpose**: Manages rewards, badges, challenges, and loyalty points system.
 
-## Database Design
+**Responsibilities**:
+- Track user task completion and assign points
+- Manage badge progression and achievements
+- Calculate tier-based benefits and cashback
+- Generate personalized challenges
 
-### Core Entity Relationships
+**Integration Points**:
+- Receives task completion events from all agents
+- Updates user profiles in PostgreSQL
+- Triggers notifications through existing notification system
+
+### 2. Life Events Agent
+
+**Purpose**: Detects life changes and provides contextual recommendations.
+
+**Responsibilities**:
+- Analyze transaction patterns for life event indicators
+- Generate personalized product recommendations
+- Coordinate with Investment Agent for financial advice
+- Maintain life event timeline and preferences
+
+**Data Sources**:
+- Transaction history analysis
+- User profile changes
+- Spending pattern deviations
+- External data integrations (where permitted)
+
+### 3. Behavioral Intelligence Agent
+
+**Purpose**: Personalizes user experience based on behavior analysis.
+
+**Responsibilities**:
+- UPI adoption guidance and incentives
+- Personalized investment recommendations
+- Bill payment automation suggestions
+- App usage optimization recommendations
+
+**ML Components**:
+- Behavior pattern recognition
+- Preference learning algorithms
+- Recommendation engines
+- Usage optimization models
+
+## Technical Implementation Details
+
+### Backend Services Architecture
+
+```python
+# New service structure
+backend/src/
+├── agents/
+│   ├── gamification/          # New gamification agent
+│   ├── life_events/           # New life events agent
+│   ├── behavioral/            # New behavioral intelligence agent
+│   └── enhanced_fraud/        # Enhanced fraud agent
+├── services/
+│   ├── gamification_service/  # Business logic for rewards
+│   ├── ml_service/           # Machine learning models
+│   └── analytics_service/    # Advanced analytics
+└── models/
+    ├── gamification/         # Gamification data models
+    ├── behavioral/           # Behavioral tracking models
+    └── life_events/          # Life event models
+```
+
+### Database Schema Design
+
+#### Gamification Tables
 
 ```sql
--- Customer Management
-CREATE TABLE customers (
-    customer_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    date_of_birth DATE NOT NULL,
-    address JSONB NOT NULL,
-    kyc_status VARCHAR(20) DEFAULT 'pending',
-    risk_score INTEGER DEFAULT 0,
+-- User gamification profile
+CREATE TABLE user_gamification_profile (
+    user_id UUID PRIMARY KEY REFERENCES users(id),
+    total_points INTEGER DEFAULT 0,
+    tier_level VARCHAR(20) DEFAULT 'Bronze',
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Account Management  
-CREATE TABLE accounts (
-    account_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID REFERENCES customers(customer_id),
-    account_number VARCHAR(16) UNIQUE NOT NULL,
-    account_type VARCHAR(20) NOT NULL, -- savings, current, loan
-    balance DECIMAL(15,2) DEFAULT 0.00,
-    currency VARCHAR(3) DEFAULT 'INR',
-    status VARCHAR(20) DEFAULT 'active',
-    opened_date DATE DEFAULT CURRENT_DATE,
-    last_transaction_date TIMESTAMP,
-    overdraft_limit DECIMAL(15,2) DEFAULT 0.00,
-    created_at TIMESTAMP DEFAULT NOW()
+-- Badge system
+CREATE TABLE badges (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon_url VARCHAR(255),
+    points_required INTEGER,
+    category VARCHAR(50)
 );
 
--- Card Management
-CREATE TABLE cards (
-    card_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    account_id UUID REFERENCES accounts(account_id),
-    card_number VARCHAR(16) UNIQUE NOT NULL,
-    card_type VARCHAR(20) NOT NULL, -- debit, credit
-    expiry_date DATE NOT NULL,
-    cvv_hash VARCHAR(255) NOT NULL,
-    status VARCHAR(20) DEFAULT 'active',
-    credit_limit DECIMAL(15,2),
-    available_credit DECIMAL(15,2),
-    pin_hash VARCHAR(255) NOT NULL,
-    issued_date DATE DEFAULT CURRENT_DATE,
-    created_at TIMESTAMP DEFAULT NOW()
+-- User badges tracking
+CREATE TABLE user_badges (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    badge_id UUID REFERENCES badges(id),
+    earned_at TIMESTAMP DEFAULT NOW(),
+    progress JSONB DEFAULT '{}'
 );
 
--- Transaction Management
-CREATE TABLE transactions (
-    transaction_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    account_id UUID REFERENCES accounts(account_id),
-    transaction_type VARCHAR(20) NOT NULL, -- debit, credit, transfer
-    amount DECIMAL(15,2) NOT NULL,
-    currency VARCHAR(3) DEFAULT 'INR',
-    balance_after DECIMAL(15,2) NOT NULL,
-    description TEXT NOT NULL,
-    merchant_category VARCHAR(50),
-    merchant_name VARCHAR(100),
-    reference_number VARCHAR(50) UNIQUE,
-    status VARCHAR(20) DEFAULT 'completed',
-    transaction_date TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
--- Loan Management
-CREATE TABLE loans (
-    loan_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID REFERENCES customers(customer_id),
-    loan_type VARCHAR(30) NOT NULL, -- personal, home, auto
-    principal_amount DECIMAL(15,2) NOT NULL,
-    interest_rate DECIMAL(5,4) NOT NULL,
-    tenure_months INTEGER NOT NULL,
-    emi_amount DECIMAL(15,2) NOT NULL,
-    outstanding_amount DECIMAL(15,2) NOT NULL,
-    status VARCHAR(20) DEFAULT 'active',
-    disbursement_date DATE,
-    maturity_date DATE,
-    next_emi_date DATE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Fixed Deposit Management
-CREATE TABLE fixed_deposits (
-    fd_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID REFERENCES customers(customer_id),
-    principal_amount DECIMAL(15,2) NOT NULL,
-    interest_rate DECIMAL(5,4) NOT NULL,
-    tenure_months INTEGER NOT NULL,
-    maturity_amount DECIMAL(15,2) NOT NULL,
-    status VARCHAR(20) DEFAULT 'active',
-    start_date DATE DEFAULT CURRENT_DATE,
-    maturity_date DATE NOT NULL,
-    auto_renewal BOOLEAN DEFAULT false,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Fraud Detection
-CREATE TABLE fraud_alerts (
-    alert_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID REFERENCES customers(customer_id),
-    transaction_id UUID REFERENCES transactions(transaction_id),
-    alert_type VARCHAR(30) NOT NULL,
-    risk_score INTEGER NOT NULL,
-    description TEXT NOT NULL,
-    status VARCHAR(20) DEFAULT 'open',
-    created_at TIMESTAMP DEFAULT NOW(),
-    resolved_at TIMESTAMP
-);
-
--- Customer Support
-CREATE TABLE support_tickets (
-    ticket_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    customer_id UUID REFERENCES customers(customer_id),
-    agent_id UUID,
+-- Challenges system
+CREATE TABLE challenges (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(200) NOT NULL,
-    description TEXT NOT NULL,
-    priority VARCHAR(20) DEFAULT 'medium',
-    status VARCHAR(20) DEFAULT 'open',
-    category VARCHAR(50) NOT NULL,
-    conversation_history JSONB DEFAULT '[]',
-    created_at TIMESTAMP DEFAULT NOW(),
+    description TEXT,
+    challenge_type VARCHAR(50),
+    target_value INTEGER,
+    points_reward INTEGER,
+    start_date DATE,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- User challenge participation
+CREATE TABLE user_challenges (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    challenge_id UUID REFERENCES challenges(id),
+    current_progress INTEGER DEFAULT 0,
+    completed_at TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'active'
+);
+```
+
+#### Behavioral Intelligence Tables
+
+```sql
+-- Behavioral patterns tracking
+CREATE TABLE behavioral_patterns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    pattern_type VARCHAR(50), -- 'upi_usage', 'investment_behavior', etc.
+    pattern_data JSONB,
+    confidence_score DECIMAL(3,2),
+    detected_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Personalization preferences
+CREATE TABLE user_preferences (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    preference_category VARCHAR(50),
+    preference_value JSONB,
+    learning_source VARCHAR(50), -- 'explicit', 'implicit', 'ml_derived'
+    confidence DECIMAL(3,2),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- AI Agent Interactions
-CREATE TABLE agent_interactions (
-    interaction_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_id UUID NOT NULL,
-    customer_id UUID REFERENCES customers(customer_id),
-    agent_type VARCHAR(30) NOT NULL,
-    intent VARCHAR(50),
-    user_message TEXT,
-    agent_response TEXT,
-    confidence_score DECIMAL(3,2),
-    response_time_ms INTEGER,
-    created_at TIMESTAMP DEFAULT NOW()
+-- Recommendation history
+CREATE TABLE recommendations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    recommendation_type VARCHAR(50),
+    content JSONB,
+    source_agent VARCHAR(50),
+    presented_at TIMESTAMP DEFAULT NOW(),
+    user_action VARCHAR(20), -- 'accepted', 'dismissed', 'ignored'
+    feedback_score INTEGER
 );
 ```
-### Database Indexes and Performance Optimization
+
+#### Life Events Tables
 
 ```sql
--- Customer lookup optimization
-CREATE INDEX idx_customers_email ON customers(email);
-CREATE INDEX idx_customers_phone ON customers(phone);
+-- Life events detection
+CREATE TABLE life_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    event_type VARCHAR(50), -- 'job_change', 'marriage', 'home_purchase', etc.
+    detected_at TIMESTAMP DEFAULT NOW(),
+    confidence_score DECIMAL(3,2),
+    indicators JSONB, -- Supporting data/patterns
+    status VARCHAR(20) DEFAULT 'detected' -- 'detected', 'confirmed', 'dismissed'
+);
 
--- Account performance indexes  
-CREATE INDEX idx_accounts_customer_id ON accounts(customer_id);
-CREATE INDEX idx_accounts_number ON accounts(account_number);
-CREATE INDEX idx_accounts_status ON accounts(status) WHERE status = 'active';
+-- Life event recommendations
+CREATE TABLE life_event_recommendations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    life_event_id UUID REFERENCES life_events(id),
+    product_type VARCHAR(50),
+    recommendation_data JSONB,
+    priority_score INTEGER,
+    created_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP
+);
+```
+### Enhanced Fraud Agent Architecture
 
--- Transaction query optimization
-CREATE INDEX idx_transactions_account_date ON transactions(account_id, transaction_date DESC);
-CREATE INDEX idx_transactions_type_date ON transactions(transaction_type, transaction_date);
-CREATE INDEX idx_transactions_merchant ON transactions(merchant_category, transaction_date);
+The existing Fraud Agent is enhanced with educational components:
 
--- Card management indexes
-CREATE INDEX idx_cards_account_id ON cards(account_id);
-CREATE INDEX idx_cards_number ON cards(card_number);
-CREATE INDEX idx_cards_status ON cards(status) WHERE status IN ('active', 'blocked');
+```python
+class EnhancedFraudAgent:
+    """Enhanced fraud detection with educational components."""
+    
+    def __init__(self):
+        self.detection_engine = FraudDetectionEngine()
+        self.education_service = FraudEducationService()
+        self.prevention_guide = PreventionGuideService()
+    
+    async def analyze_transaction(self, transaction: Transaction) -> FraudAnalysis:
+        """Analyze transaction with educational context."""
+        analysis = await self.detection_engine.analyze(transaction)
+        
+        if analysis.risk_level > 0.3:
+            educational_content = await self.education_service.get_guidance(
+                analysis.fraud_type, 
+                user_profile=transaction.user
+            )
+            analysis.educational_content = educational_content
+            
+        return analysis
+    
+    async def provide_prevention_guidance(self, user_id: str, threat_type: str) -> Dict:
+        """Provide personalized fraud prevention guidance."""
+        user_context = await self.get_user_context(user_id)
+        return await self.prevention_guide.generate_guidance(threat_type, user_context)
+```
 
--- Fraud detection optimization
-CREATE INDEX idx_fraud_alerts_customer ON fraud_alerts(customer_id, created_at DESC);
-CREATE INDEX idx_fraud_alerts_status ON fraud_alerts(status) WHERE status = 'open';
+## Machine Learning Integration
 
--- AI interaction analytics
-CREATE INDEX idx_agent_interactions_session ON agent_interactions(session_id, created_at);
-CREATE INDEX idx_agent_interactions_agent_type ON agent_interactions(agent_type, created_at);
+### Behavioral Analysis Pipeline
+
+The system uses multiple ML models for behavioral intelligence:
+
+```python
+class BehavioralAnalysisPipeline:
+    """ML pipeline for behavioral analysis and recommendations."""
+    
+    def __init__(self):
+        self.pattern_detector = PatternDetectionModel()
+        self.preference_learner = PreferenceLearningModel()
+        self.recommendation_engine = RecommendationEngine()
+        self.gemini_client = GeminiClient()
+    
+    async def analyze_user_behavior(self, user_id: str) -> BehavioralInsights:
+        """Comprehensive behavioral analysis."""
+        # Collect behavioral data
+        transaction_data = await self.get_transaction_patterns(user_id)
+        interaction_data = await self.get_app_usage_patterns(user_id)
+        
+        # Pattern detection
+        patterns = await self.pattern_detector.detect_patterns(
+            transaction_data, interaction_data
+        )
+        
+        # Generate insights using Gemini 2.5 Flash
+        insights = await self.gemini_client.generate_behavioral_insights(
+            patterns, user_context
+        )
+        
+        return BehavioralInsights(
+            patterns=patterns,
+            preferences=insights.preferences,
+            recommendations=insights.recommendations
+        )
+```
+
+### Life Event Detection Algorithm
+
+```python
+class LifeEventDetector:
+    """Detects life events from transaction and behavior patterns."""
+    
+    def __init__(self):
+        self.transaction_analyzer = TransactionPatternAnalyzer()
+        self.spending_analyzer = SpendingBehaviorAnalyzer()
+        self.gemini_client = GeminiClient()
+    
+    async def detect_life_events(self, user_id: str) -> List[LifeEvent]:
+        """Detect potential life events for user."""
+        recent_transactions = await self.get_recent_transactions(user_id, days=90)
+        spending_changes = await self.analyze_spending_changes(recent_transactions)
+        
+        # Use Gemini for contextual analysis
+        life_events = await self.gemini_client.analyze_life_events(
+            spending_changes, user_profile
+        )
+        
+        return [
+            LifeEvent(
+                type=event.type,
+                confidence=event.confidence,
+                indicators=event.supporting_data,
+                detected_at=datetime.utcnow()
+            )
+            for event in life_events if event.confidence > 0.7
+        ]
 ```
 
 ## API Design
 
-### Authentication API
+### Gamification Endpoints
 
-```typescript
-interface AuthenticationAPI {
-  // Customer authentication
-  POST /api/auth/login
-  Request: { email: string, password: string }
-  Response: { token: string, refreshToken: string, customer: CustomerProfile }
+```python
+# New gamification routes
+@router.get("/gamification/profile")
+async def get_gamification_profile(user_id: str = Depends(get_current_user)):
+    """Get user's gamification profile including points, badges, and tier."""
+    return await gamification_service.get_profile(user_id)
 
-  POST /api/auth/demo-login
-  Request: { demoAccountId: string }
-  Response: { token: string, customer: CustomerProfile }
+@router.get("/gamification/challenges")
+async def get_active_challenges(user_id: str = Depends(get_current_user)):
+    """Get active challenges for user."""
+    return await gamification_service.get_active_challenges(user_id)
 
-  POST /api/auth/refresh
-  Request: { refreshToken: string }
-  Response: { token: string }
+@router.post("/gamification/challenges/{challenge_id}/join")
+async def join_challenge(challenge_id: str, user_id: str = Depends(get_current_user)):
+    """Join a specific challenge."""
+    return await gamification_service.join_challenge(user_id, challenge_id)
 
-  POST /api/auth/logout
-  Request: { refreshToken: string }
-  Response: { success: boolean }
-}
+@router.get("/gamification/leaderboard")
+async def get_leaderboard(category: str = "overall"):
+    """Get leaderboard for specified category."""
+    return await gamification_service.get_leaderboard(category)
 ```
 
-### Customer Service API
+### Behavioral Intelligence Endpoints
 
-```typescript
-interface CustomerServiceAPI {
-  // Account management
-  GET /api/customers/accounts
-  Response: Account[]
+```python
+@router.get("/behavioral/insights")
+async def get_behavioral_insights(user_id: str = Depends(get_current_user)):
+    """Get personalized behavioral insights and recommendations."""
+    return await behavioral_service.get_insights(user_id)
 
-  GET /api/customers/accounts/{accountId}/transactions
-  Query: { limit?: number, offset?: number, startDate?: string, endDate?: string }
-  Response: { transactions: Transaction[], totalCount: number }
+@router.post("/behavioral/feedback")
+async def provide_feedback(
+    recommendation_id: str,
+    feedback: RecommendationFeedback,
+    user_id: str = Depends(get_current_user)
+):
+    """Provide feedback on recommendation to improve future suggestions."""
+    return await behavioral_service.record_feedback(user_id, recommendation_id, feedback)
 
-  GET /api/customers/accounts/{accountId}/balance
-  Response: { balance: number, currency: string, lastUpdated: string }
-
-  // Card management  
-  GET /api/customers/cards
-  Response: Card[]
-
-  POST /api/customers/cards/{cardId}/block
-  Request: { reason: string }
-  Response: { success: boolean, blockedAt: string }
-
-  POST /api/customers/cards/{cardId}/report-lost
-  Request: { reason: string, reportLocation?: string }
-  Response: { success: boolean, replacementCardId: string, estimatedDelivery: string }
-
-  GET /api/customers/cards/{cardId}/analytics
-  Response: CardAnalytics
-}
-```
-### Loan Service API
-
-```typescript
-interface LoanServiceAPI {
-  // Loan eligibility and applications
-  POST /api/loans/eligibility
-  Request: { loanType: string, requestedAmount: number }
-  Response: { eligible: boolean, maxAmount?: number, recommendedTenure?: number }
-
-  POST /api/loans/apply
-  Request: LoanApplication
-  Response: { applicationId: string, status: string, estimatedApprovalTime: string }
-
-  GET /api/loans/calculator/emi
-  Query: { amount: number, rate: number, tenure: number }
-  Response: { emiAmount: number, totalInterest: number, totalAmount: number }
-
-  GET /api/customers/loans
-  Response: Loan[]
-
-  GET /api/customers/loans/{loanId}/schedule
-  Response: EMISchedule[]
-}
-
-interface LoanApplication {
-  loanType: string;
-  amount: number;
-  tenure: number;
-  purpose: string;
-  monthlyIncome: number;
-  employmentType: string;
-  documents: DocumentUpload[];
-}
+@router.get("/behavioral/upi-adoption")
+async def get_upi_adoption_guidance(user_id: str = Depends(get_current_user)):
+    """Get personalized UPI adoption recommendations."""
+    return await behavioral_service.get_upi_guidance(user_id)
 ```
 
-### Investment Service API  
+### Life Events Endpoints
 
-```typescript
-interface InvestmentServiceAPI {
-  // Fixed Deposit management
-  GET /api/investments/fd/rates
-  Response: FDRate[]
+```python
+@router.get("/life-events")
+async def get_detected_life_events(user_id: str = Depends(get_current_user)):
+    """Get detected life events and their recommendations."""
+    return await life_events_service.get_detected_events(user_id)
 
-  POST /api/investments/fd/create
-  Request: { amount: number, tenure: number, autoRenewal: boolean }
-  Response: { fdId: string, maturityAmount: number, maturityDate: string }
+@router.post("/life-events/{event_id}/confirm")
+async def confirm_life_event(
+    event_id: str,
+    confirmation: LifeEventConfirmation,
+    user_id: str = Depends(get_current_user)
+):
+    """Confirm or dismiss a detected life event."""
+    return await life_events_service.confirm_event(user_id, event_id, confirmation)
 
-  GET /api/customers/investments
-  Response: Investment[]
-
-  GET /api/investments/recommendations
-  Query: { riskAppetite: string, investmentGoal: string, amount?: number }
-  Response: InvestmentRecommendation[]
-}
+@router.get("/life-events/recommendations")
+async def get_life_event_recommendations(user_id: str = Depends(get_current_user)):
+    """Get personalized recommendations based on confirmed life events."""
+    return await life_events_service.get_recommendations(user_id)
 ```
 
-### AI Agent API
+## Frontend Integration
+
+### New React Components
 
 ```typescript
-interface AIAgentAPI {
-  // Conversation management
-  POST /api/ai/chat/sessions
-  Response: { sessionId: string }
-
-  POST /api/ai/chat/sessions/{sessionId}/messages
-  Request: { message: string, messageType?: 'text' | 'voice' }
-  Response: { response: string, agentType: string, confidence: number, actions?: AIAction[] }
-
-  GET /api/ai/chat/sessions/{sessionId}/history
-  Response: ChatMessage[]
-
-  // Voice banking
-  POST /api/ai/voice/process
-  Request: { audioData: Blob, sessionId: string }
-  Response: { transcription: string, response: string, audioResponse: Blob }
-
-  // Document processing
-  POST /api/ai/documents/process
-  Request: { file: File, documentType: string }
-  Response: { extractedData: any, confidence: number, validationResults: ValidationResult[] }
-}
-```
-## AI Agent Architecture
-
-### Multi-Agent System Design
-
-```typescript
-interface AgentArchitecture {
-  // Core agent types
-  RouterAgent: IntentClassificationAgent;
-  MemoryAgent: ConversationContextAgent;
-  FAQAgent: KnowledgeRetrievalAgent;
-  CardAgent: CardServiceAgent;
-  LoanAgent: LoanServiceAgent;
-  FraudAgent: FraudDetectionAgent;
-  InvestmentAgent: InvestmentServiceAgent;
-  HumanHandoffAgent: EscalationAgent;
-}
-```
-
-### LangGraph Workflow Implementation
-
-```typescript
-// Agent workflow state management
-interface AgentState {
-  sessionId: string;
-  customerId: string;
-  currentAgent: string;
-  conversationHistory: Message[];
-  extractedEntities: Record<string, any>;
-  pendingActions: Action[];
-  escalationReason?: string;
+// Gamification Dashboard Component
+interface GamificationDashboard {
+  profile: GamificationProfile;
+  activeChallenges: Challenge[];
+  recentAchievements: Badge[];
+  tierProgress: TierProgress;
 }
 
-// Router Agent implementation
-class RouterAgent implements Agent {
-  async processMessage(state: AgentState, message: string): Promise<AgentDecision> {
-    const intent = await this.classifyIntent(message);
-    const confidence = await this.calculateConfidence(message, intent);
-    
-    if (confidence < 0.7) {
-      return { nextAgent: 'FAQ', reason: 'low_confidence' };
-    }
-    
-    const agentMapping = {
-      'balance_inquiry': 'Account',
-      'card_services': 'Card', 
-      'loan_services': 'Loan',
-      'investment_advice': 'Investment',
-      'fraud_report': 'Fraud',
-      'general_inquiry': 'FAQ'
-    };
-    
-    return { nextAgent: agentMapping[intent], confidence };
-  }
-  
-  private async classifyIntent(message: string): Promise<string> {
-    const prompt = `Classify this banking query intent: "${message}"`;
-    return await this.llmClient.classify(prompt, this.intentLabels);
-  }
-}
-
-// Memory Agent for context management
-class MemoryAgent implements Agent {
-  private contextStore: Map<string, ConversationContext> = new Map();
-  
-  async updateContext(sessionId: string, message: Message, agentResponse: AgentResponse): Promise<void> {
-    const context = this.contextStore.get(sessionId) || { 
-      messages: [], 
-      extractedEntities: {},
-      customerPreferences: {}
-    };
-    
-    context.messages.push(message);
-    context.extractedEntities = { ...context.extractedEntities, ...agentResponse.entities };
-    this.contextStore.set(sessionId, context);
-    
-    // Persist to database for long-term storage
-    await this.persistContext(sessionId, context);
-  }
-  
-  async getContext(sessionId: string): Promise<ConversationContext | null> {
-    return this.contextStore.get(sessionId) || await this.loadContext(sessionId);
-  }
-}
-```
-### Specialized Agent Implementations
-
-```typescript
-// Card Agent for card-related services
-class CardAgent implements Agent {
-  async processCardRequest(state: AgentState, request: CardRequest): Promise<CardResponse> {
-    const { action, cardId, customerId } = request;
-    
-    switch (action) {
-      case 'block_card':
-        return await this.blockCard(cardId, request.reason);
-      case 'report_lost':
-        return await this.reportLostCard(cardId, customerId);
-      case 'get_analytics':
-        return await this.getCardAnalytics(cardId);
-      default:
-        return { success: false, error: 'Unknown card action' };
-    }
-  }
-  
-  private async blockCard(cardId: string, reason: string): Promise<CardResponse> {
-    await this.cardService.updateCardStatus(cardId, 'blocked');
-    await this.notificationService.sendCardBlockedNotification(cardId);
-    return { success: true, message: 'Card blocked successfully' };
-  }
-}
-
-// Loan Agent for loan services
-class LoanAgent implements Agent {
-  async calculateEligibility(customerProfile: CustomerProfile, loanRequest: LoanRequest): Promise<EligibilityResult> {
-    const creditScore = await this.creditService.getScore(customerProfile.customerId);
-    const monthlyIncome = customerProfile.monthlyIncome;
-    const existingObligations = await this.loanService.getExistingLoans(customerProfile.customerId);
-    
-    const eligibilityRules = {
-      minCreditScore: 650,
-      maxDebtToIncomeRatio: 0.4,
-      minMonthlyIncome: 25000
-    };
-    
-    const currentDebtRatio = existingObligations.reduce((sum, loan) => sum + loan.emiAmount, 0) / monthlyIncome;
-    
-    const eligible = creditScore >= eligibilityRules.minCreditScore &&
-                    currentDebtRatio <= eligibilityRules.maxDebtToIncomeRatio &&
-                    monthlyIncome >= eligibilityRules.minMonthlyIncome;
-    
-    const maxEligibleAmount = eligible ? 
-      (monthlyIncome * 0.4 - existingObligations.reduce((sum, loan) => sum + loan.emiAmount, 0)) * 60 : 0;
-    
-    return { eligible, maxAmount: maxEligibleAmount, creditScore };
-  }
-  
-  calculateEMI(principal: number, rate: number, tenure: number): EMICalculation {
-    const monthlyRate = rate / (12 * 100);
-    const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, tenure) / 
-                (Math.pow(1 + monthlyRate, tenure) - 1);
-    
-    return {
-      emiAmount: Math.round(emi * 100) / 100,
-      totalInterest: Math.round((emi * tenure - principal) * 100) / 100,
-      totalAmount: Math.round(emi * tenure * 100) / 100
-    };
-  }
-}
-
-// Fraud Agent for fraud detection
-class FraudAgent implements Agent {
-  async analyzeTransaction(transaction: Transaction, customerProfile: CustomerProfile): Promise<FraudAnalysis> {
-    const riskFactors = await this.calculateRiskFactors(transaction, customerProfile);
-    const riskScore = this.aggregateRiskScore(riskFactors);
-    
-    if (riskScore > 80) {
-      await this.generateFraudAlert(transaction, riskScore, riskFactors);
-      await this.blockSuspiciousCard(transaction.cardId);
-    }
-    
-    return { riskScore, riskFactors, action: riskScore > 80 ? 'block' : 'allow' };
-  }
-  
-  private async calculateRiskFactors(transaction: Transaction, profile: CustomerProfile): Promise<RiskFactor[]> {
-    const factors: RiskFactor[] = [];
-    
-    // Amount-based risk
-    if (transaction.amount > profile.averageTransactionAmount * 5) {
-      factors.push({ type: 'unusual_amount', score: 30 });
-    }
-    
-    // Location-based risk (simulated)
-    if (transaction.merchantLocation !== profile.usualLocation) {
-      factors.push({ type: 'unusual_location', score: 25 });
-    }
-    
-    // Time-based risk
-    const transactionHour = new Date(transaction.transactionDate).getHours();
-    if (transactionHour < 6 || transactionHour > 23) {
-      factors.push({ type: 'unusual_time', score: 15 });
-    }
-    
-    // Frequency-based risk
-    const recentTransactions = await this.getRecentTransactions(transaction.cardId, 24);
-    if (recentTransactions.length > 10) {
-      factors.push({ type: 'high_frequency', score: 40 });
-    }
-    
-    return factors;
-  }
-}
-```
-## Frontend Architecture
-
-### Customer Portal Architecture
-
-```typescript
-// React component structure
-interface CustomerPortalStructure {
-  App: MainApplication;
-  Layout: {
-    Header: NavigationHeader;
-    Sidebar: QuickActionsSidebar;
-    Main: MainContent;
-    Footer: ApplicationFooter;
-  };
-  Pages: {
-    Dashboard: AccountOverviewPage;
-    Transactions: TransactionHistoryPage;
-    Cards: CardManagementPage;
-    Loans: LoanServicesPage;
-    Investments: InvestmentPortalPage;
-    Profile: CustomerProfilePage;
-    Support: AIAssistantPage;
-  };
-}
-
-// State management with React Query and Context
-interface GlobalState {
-  auth: AuthenticationState;
-  customer: CustomerProfile;
-  accounts: Account[];
-  notifications: Notification[];
-  chat: ChatSession;
-}
-
-// Authentication context
-const AuthContext = createContext<AuthState>();
-
-interface AuthState {
-  isAuthenticated: boolean;
-  token: string | null;
-  customer: CustomerProfile | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => void;
-  refreshToken: () => Promise<void>;
-}
-
-// AI Chat component
-const AIAssistant: React.FC = () => {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
-  
-  const sendMessage = useMutation(
-    (message: string) => chatAPI.sendMessage(sessionId!, message),
-    {
-      onSuccess: (response) => {
-        setMessages(prev => [...prev, 
-          { type: 'user', content: message, timestamp: new Date() },
-          { type: 'assistant', content: response.response, timestamp: new Date() }
-        ]);
-      }
-    }
-  );
-  
-  const handleVoiceInput = async (audioBlob: Blob) => {
-    const response = await chatAPI.processVoice(audioBlob, sessionId!);
-    setMessages(prev => [...prev,
-      { type: 'user', content: response.transcription, timestamp: new Date() },
-      { type: 'assistant', content: response.response, timestamp: new Date() }
-    ]);
-    
-    // Play audio response
-    if (response.audioResponse) {
-      const audio = new Audio(URL.createObjectURL(response.audioResponse));
-      audio.play();
-    }
-  };
+const GamificationDashboard: React.FC = () => {
+  const { data: profile } = useGamificationProfile();
+  const { data: challenges } = useActiveChallenges();
   
   return (
-    <div className="chat-container">
-      <ChatHistory messages={messages} />
-      <ChatInput onSendMessage={sendMessage.mutate} />
-      <VoiceInput 
-        isActive={isVoiceMode} 
-        onVoiceInput={handleVoiceInput}
-        onToggle={() => setIsVoiceMode(!isVoiceMode)}
-      />
-    </div>
-  );
-};
-```
-
-### Human Agent Portal Design
-
-```typescript
-// Human agent dashboard components
-interface HumanAgentPortal {
-  Dashboard: AgentDashboard;
-  TicketQueue: EscalatedTicketsList;
-  CustomerView: CustomerContextPanel;
-  ChatInterface: AgentChatInterface;
-  KnowledgeBase: AgentKnowledgePanel;
-}
-
-const AgentDashboard: React.FC = () => {
-  const { data: tickets } = useQuery('escalated-tickets', ticketAPI.getEscalatedTickets);
-  const { data: suggestions } = useQuery('ai-suggestions', aiAPI.getAgentSuggestions);
-  
-  return (
-    <div className="agent-dashboard">
-      <div className="ticket-queue">
-        <h2>Escalated Cases</h2>
-        {tickets?.map(ticket => (
-          <TicketCard 
-            key={ticket.ticketId}
-            ticket={ticket}
-            onAccept={() => handleAcceptTicket(ticket.ticketId)}
-          />
-        ))}
-      </div>
-      
-      <div className="ai-suggestions">
-        <h3>AI Suggestions</h3>
-        {suggestions?.map(suggestion => (
-          <SuggestionCard key={suggestion.id} suggestion={suggestion} />
-        ))}
-      </div>
+    <div className="gamification-dashboard">
+      <TierProgressCard progress={profile.tierProgress} />
+      <PointsDisplay points={profile.totalPoints} />
+      <BadgeCollection badges={profile.badges} />
+      <ActiveChallenges challenges={challenges} />
     </div>
   );
 };
 
-const CustomerContextPanel: React.FC<{ customerId: string }> = ({ customerId }) => {
-  const { data: customer } = useQuery(['customer', customerId], () => 
-    customerAPI.getCustomerProfile(customerId)
-  );
-  const { data: history } = useQuery(['conversation-history', customerId], () =>
-    chatAPI.getConversationHistory(customerId)
-  );
+// Behavioral Insights Component
+const BehavioralInsights: React.FC = () => {
+  const { data: insights } = useBehavioralInsights();
   
   return (
-    <div className="customer-context">
-      <CustomerProfileSummary customer={customer} />
-      <AccountsSummary accounts={customer?.accounts} />
-      <ConversationHistory history={history} />
-      <ComplaintHistory customerId={customerId} />
-    </div>
-  );
-};
-```
-### Manager Dashboard Architecture
-
-```typescript
-// Analytics and reporting dashboard
-interface ManagerDashboard {
-  Overview: PerformanceOverview;
-  Analytics: {
-    AIPerformance: AgentPerformanceMetrics;
-    CustomerSatisfaction: SatisfactionAnalytics;
-    FraudDetection: FraudAnalyticsDashboard;
-    BusinessMetrics: BusinessIntelligenceDashboard;
-  };
-  RealTime: {
-    LiveActivity: RealTimeAgentActivity;
-    AlertCenter: RealTimeAlerts;
-    SystemHealth: SystemHealthMonitor;
-  };
-}
-
-const PerformanceOverview: React.FC = () => {
-  const { data: metrics } = useQuery('performance-metrics', analyticsAPI.getOverviewMetrics, {
-    refetchInterval: 30000 // Update every 30 seconds
-  });
-  
-  return (
-    <div className="performance-overview">
-      <MetricCard 
-        title="AI Resolution Rate"
-        value={metrics?.aiResolutionRate}
-        trend={metrics?.resolutionTrend}
-        target={85}
-      />
-      <MetricCard 
-        title="Average Response Time"
-        value={metrics?.avgResponseTime}
-        unit="seconds"
-        trend={metrics?.responseTrend}
-      />
-      <MetricCard 
-        title="Customer Satisfaction"
-        value={metrics?.customerSatisfaction}
-        unit="score"
-        trend={metrics?.satisfactionTrend}
-      />
-      <MetricCard 
-        title="Fraud Detection Accuracy"
-        value={metrics?.fraudAccuracy}
-        trend={metrics?.fraudTrend}
-      />
+    <div className="behavioral-insights">
+      <RecommendationCarousel recommendations={insights.recommendations} />
+      <UsageOptimization suggestions={insights.optimizations} />
+      <PersonalizationSettings preferences={insights.preferences} />
     </div>
   );
 };
 
-const RealTimeAlerts: React.FC = () => {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  
-  useEffect(() => {
-    const ws = new WebSocket(WS_ALERTS_URL);
-    
-    ws.onmessage = (event) => {
-      const alert = JSON.parse(event.data);
-      setAlerts(prev => [alert, ...prev.slice(0, 9)]); // Keep last 10 alerts
-    };
-    
-    return () => ws.close();
-  }, []);
+// Life Events Component
+const LifeEventsManager: React.FC = () => {
+  const { data: events } = useLifeEvents();
+  const confirmEvent = useConfirmLifeEvent();
   
   return (
-    <div className="real-time-alerts">
-      <h3>Live Alerts</h3>
-      {alerts.map(alert => (
-        <AlertItem 
-          key={alert.id}
-          alert={alert}
-          onAcknowledge={() => handleAcknowledgeAlert(alert.id)}
+    <div className="life-events-manager">
+      {events.map(event => (
+        <LifeEventCard
+          key={event.id}
+          event={event}
+          onConfirm={confirmEvent}
+          recommendations={event.recommendations}
         />
       ))}
     </div>
@@ -825,638 +456,629 @@ const RealTimeAlerts: React.FC = () => {
 };
 ```
 
-## Security Implementation
-
-### Authentication and Authorization
+### State Management
 
 ```typescript
-// JWT token management
-interface SecurityImplementation {
-  Authentication: JWTAuthenticationService;
-  Authorization: RoleBasedAccessControl;
-  Encryption: DataEncryptionService;
-  Audit: SecurityAuditService;
+// Zustand store for gamification state
+interface GamificationStore {
+  profile: GamificationProfile | null;
+  challenges: Challenge[];
+  achievements: Achievement[];
+  updateProfile: (profile: GamificationProfile) => void;
+  addAchievement: (achievement: Achievement) => void;
 }
 
-class JWTAuthenticationService {
-  private readonly SECRET_KEY = process.env.JWT_SECRET!;
-  private readonly REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-  
-  generateTokens(customer: CustomerProfile): TokenPair {
-    const accessToken = jwt.sign(
-      { 
-        customerId: customer.customerId,
-        email: customer.email,
-        role: 'customer'
-      },
-      this.SECRET_KEY,
-      { expiresIn: '15m' }
-    );
-    
-    const refreshToken = jwt.sign(
-      { customerId: customer.customerId },
-      this.REFRESH_SECRET,
-      { expiresIn: '7d' }
-    );
-    
-    return { accessToken, refreshToken };
-  }
-  
-  validateToken(token: string): CustomerPayload | null {
-    try {
-      return jwt.verify(token, this.SECRET_KEY) as CustomerPayload;
-    } catch (error) {
-      return null;
-    }
-  }
-  
-  async refreshAccessToken(refreshToken: string): Promise<string | null> {
-    try {
-      const payload = jwt.verify(refreshToken, this.REFRESH_SECRET) as { customerId: string };
-      const customer = await this.customerService.getById(payload.customerId);
-      
-      if (!customer) return null;
-      
-      return this.generateTokens(customer).accessToken;
-    } catch (error) {
-      return null;
-    }
-  }
-}
-
-// Role-based access control middleware
-const authorize = (requiredRole: string) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const { role } = req.user;
-    
-    if (role !== requiredRole) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
-    
-    next();
-  };
-};
-
-// Data masking for sensitive information
-class DataMaskingService {
-  maskAccountNumber(accountNumber: string): string {
-    return accountNumber.slice(0, 4) + '*'.repeat(8) + accountNumber.slice(-4);
-  }
-  
-  maskCardNumber(cardNumber: string): string {
-    return cardNumber.slice(0, 4) + ' **** **** ' + cardNumber.slice(-4);
-  }
-  
-  maskPhoneNumber(phoneNumber: string): string {
-    return phoneNumber.slice(0, 2) + '*'.repeat(6) + phoneNumber.slice(-2);
-  }
-  
-  sanitizeLogData(data: any): any {
-    const sensitiveFields = ['password', 'pin', 'cvv', 'ssn', 'panNumber'];
-    const sanitized = { ...data };
-    
-    sensitiveFields.forEach(field => {
-      if (sanitized[field]) {
-        sanitized[field] = '[REDACTED]';
-      }
-    });
-    
-    return sanitized;
-  }
-}
+const useGamificationStore = create<GamificationStore>((set) => ({
+  profile: null,
+  challenges: [],
+  achievements: [],
+  updateProfile: (profile) => set({ profile }),
+  addAchievement: (achievement) =>
+    set((state) => ({
+      achievements: [...state.achievements, achievement],
+    })),
+}));
 ```
-### Data Encryption and Security
-
-```typescript
-// Encryption service for sensitive data
-class EncryptionService {
-  private readonly ALGORITHM = 'aes-256-gcm';
-  private readonly KEY = Buffer.from(process.env.ENCRYPTION_KEY!, 'base64');
-  
-  encrypt(text: string): EncryptedData {
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher(this.ALGORITHM, this.KEY);
-    cipher.setAAD(Buffer.from('ArthaMind', 'utf8'));
-    
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
-    const authTag = cipher.getAuthTag();
-    
-    return {
-      encrypted,
-      iv: iv.toString('hex'),
-      authTag: authTag.toString('hex')
-    };
-  }
-  
-  decrypt(encryptedData: EncryptedData): string {
-    const decipher = crypto.createDecipher(this.ALGORITHM, this.KEY);
-    decipher.setAAD(Buffer.from('ArthaMind', 'utf8'));
-    decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'hex'));
-    
-    let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
-  }
-}
-
-// Password hashing service
-class PasswordService {
-  private readonly SALT_ROUNDS = 12;
-  
-  async hashPassword(password: string): Promise<string> {
-    return await bcrypt.hash(password, this.SALT_ROUNDS);
-  }
-  
-  async verifyPassword(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
-  }
-  
-  generateSecurePin(): string {
-    return Math.floor(1000 + Math.random() * 9000).toString();
-  }
-}
-
-// Security audit logging
-class SecurityAuditService {
-  async logAuthenticationAttempt(email: string, success: boolean, ipAddress: string): Promise<void> {
-    await this.auditRepository.create({
-      eventType: 'authentication_attempt',
-      userId: email,
-      success,
-      metadata: { ipAddress },
-      timestamp: new Date()
-    });
-  }
-  
-  async logDataAccess(customerId: string, resource: string, action: string): Promise<void> {
-    await this.auditRepository.create({
-      eventType: 'data_access',
-      userId: customerId,
-      resource,
-      action,
-      timestamp: new Date()
-    });
-  }
-  
-  async logFraudAlert(alertId: string, customerId: string, riskScore: number): Promise<void> {
-    await this.auditRepository.create({
-      eventType: 'fraud_alert',
-      alertId,
-      userId: customerId,
-      metadata: { riskScore },
-      timestamp: new Date()
-    });
-  }
-}
-```
-
 ## Integration Patterns
 
-### RAG System Integration with ChromaDB
+### LangGraph Workflow Enhancement
 
-```typescript
-// Knowledge base management with ChromaDB
-class KnowledgeBaseService {
-  private chromaClient: ChromaApi;
-  private collection: Collection;
-  
-  constructor() {
-    this.chromaClient = new ChromaApi();
-    this.initializeCollection();
-  }
-  
-  private async initializeCollection(): Promise<void> {
-    this.collection = await this.chromaClient.getOrCreateCollection({
-      name: 'banking_knowledge',
-      embeddingFunction: new OpenAIEmbeddingFunction({
-        openai_api_key: process.env.OPENAI_API_KEY
-      })
-    });
-  }
-  
-  async indexDocument(document: BankingDocument): Promise<void> {
-    const chunks = this.chunkDocument(document.content);
-    
-    for (const chunk of chunks) {
-      await this.collection.add({
-        documents: [chunk.text],
-        metadatas: [{
-          documentId: document.id,
-          documentType: document.type,
-          section: chunk.section,
-          lastUpdated: document.lastUpdated
-        }],
-        ids: [`${document.id}_${chunk.index}`]
-      });
-    }
-  }
-  
-  async queryKnowledge(question: string, context?: string): Promise<KnowledgeResult[]> {
-    const results = await this.collection.query({
-      queryTexts: [question],
-      nResults: 5,
-      whereDocument: context ? { $contains: context } : undefined
-    });
-    
-    return results.documents[0].map((doc, index) => ({
-      content: doc,
-      metadata: results.metadatas[0][index],
-      relevanceScore: results.distances[0][index]
-    }));
-  }
-  
-  private chunkDocument(content: string): DocumentChunk[] {
-    // Implement intelligent document chunking
-    const sentences = content.split(/[.!?]+/);
-    const chunks: DocumentChunk[] = [];
-    let currentChunk = '';
-    let chunkIndex = 0;
-    
-    for (const sentence of sentences) {
-      if (currentChunk.length + sentence.length > 1000) {
-        chunks.push({
-          text: currentChunk.trim(),
-          index: chunkIndex++,
-          section: this.extractSection(currentChunk)
-        });
-        currentChunk = sentence;
-      } else {
-        currentChunk += sentence + '.';
-      }
-    }
-    
-    if (currentChunk.length > 0) {
-      chunks.push({
-        text: currentChunk.trim(),
-        index: chunkIndex,
-        section: this.extractSection(currentChunk)
-      });
-    }
-    
-    return chunks;
-  }
-}
-```
-### Event-Driven Communication
+The existing LangGraph workflow is enhanced to incorporate new agents:
 
-```typescript
-// Event bus for microservices communication
-class EventBus {
-  private redis: Redis.Redis;
-  private subscribers: Map<string, EventHandler[]> = new Map();
-  
-  constructor() {
-    this.redis = new Redis(process.env.REDIS_URL);
-  }
-  
-  async publish(eventType: string, payload: any): Promise<void> {
-    const event: DomainEvent = {
-      id: uuidv4(),
-      type: eventType,
-      payload,
-      timestamp: new Date(),
-      source: process.env.SERVICE_NAME
-    };
+```python
+class EnhancedArthaMindWorkflow:
+    """Enhanced workflow incorporating advanced AI features."""
     
-    await this.redis.publish(eventType, JSON.stringify(event));
-  }
-  
-  subscribe(eventType: string, handler: EventHandler): void {
-    if (!this.subscribers.has(eventType)) {
-      this.subscribers.set(eventType, []);
-      this.redis.subscribe(eventType);
-    }
-    
-    this.subscribers.get(eventType)!.push(handler);
-  }
-  
-  private setupEventHandlers(): void {
-    this.redis.on('message', async (channel, message) => {
-      const event: DomainEvent = JSON.parse(message);
-      const handlers = this.subscribers.get(channel) || [];
-      
-      for (const handler of handlers) {
-        try {
-          await handler(event);
-        } catch (error) {
-          console.error(`Event handler failed for ${channel}:`, error);
+    def __init__(self):
+        self.router = RouterAgent()
+        self.existing_agents = {
+            "faq": FAQAgent(),
+            "card": CardAgent(),
+            "loan": LoanAgent(),
+            "fraud": EnhancedFraudAgent(),  # Enhanced version
+            "investment": InvestmentAgent(),
+            "memory": MemoryAgent(),
+            "handoff": HandoffAgent()
         }
-      }
-    });
-  }
-}
-
-// Domain events for banking operations
-interface BankingEvents {
-  'customer.authenticated': { customerId: string; sessionId: string };
-  'transaction.created': { transactionId: string; accountId: string; amount: number };
-  'card.blocked': { cardId: string; customerId: string; reason: string };
-  'loan.applied': { applicationId: string; customerId: string; amount: number };
-  'fraud.detected': { alertId: string; customerId: string; riskScore: number };
-  'human.escalated': { ticketId: string; customerId: string; reason: string };
-}
-
-// Event handlers for different services
-class NotificationEventHandler {
-  constructor(private notificationService: NotificationService) {}
-  
-  @EventHandler('transaction.created')
-  async handleTransactionCreated(event: DomainEvent<BankingEvents['transaction.created']>): Promise<void> {
-    const { transactionId, accountId, amount } = event.payload;
+        # New agents
+        self.new_agents = {
+            "gamification": GamificationAgent(),
+            "life_events": LifeEventsAgent(),
+            "behavioral": BehavioralIntelligenceAgent()
+        }
     
-    if (amount > 50000) {
-      await this.notificationService.sendHighValueTransactionAlert(accountId, transactionId, amount);
-    }
-  }
-  
-  @EventHandler('fraud.detected')
-  async handleFraudDetected(event: DomainEvent<BankingEvents['fraud.detected']>): Promise<void> {
-    const { alertId, customerId, riskScore } = event.payload;
-    
-    await this.notificationService.sendFraudAlert(customerId, alertId, riskScore);
-    
-    if (riskScore > 90) {
-      await this.notificationService.notifyRiskTeam(alertId, customerId);
-    }
-  }
-}
+    async def process_query(self, query: UserQuery) -> AgentResponse:
+        """Enhanced query processing with new agent capabilities."""
+        # Route to primary agent
+        primary_agent = await self.router.route_query(query)
+        
+        # Process with primary agent
+        primary_response = await primary_agent.process(query)
+        
+        # Check for enhancement opportunities
+        enhancements = await self.get_enhancement_opportunities(query, primary_response)
+        
+        # Apply enhancements
+        if enhancements.gamification:
+            gamification_data = await self.new_agents["gamification"].enhance_response(
+                primary_response, query.user_context
+            )
+            primary_response.gamification = gamification_data
+        
+        if enhancements.behavioral_insights:
+            behavioral_data = await self.new_agents["behavioral"].get_insights(
+                query.user_context
+            )
+            primary_response.behavioral_insights = behavioral_data
+        
+        if enhancements.life_event_recommendations:
+            life_event_data = await self.new_agents["life_events"].check_recommendations(
+                query.user_context
+            )
+            primary_response.life_event_recommendations = life_event_data
+        
+        return primary_response
 ```
 
-## Voice Processing Integration
+### ChromaDB Integration
 
-```typescript
-// Voice banking service implementation
-class VoiceBankingService {
-  private speechToText: SpeechToTextService;
-  private textToSpeech: TextToSpeechService;
-  private nlpProcessor: NLPProcessor;
-  
-  constructor() {
-    this.speechToText = new AzureSpeechToTextService();
-    this.textToSpeech = new AzureTextToSpeechService();
-    this.nlpProcessor = new BankingNLPProcessor();
-  }
-  
-  async processVoiceInput(audioBlob: Buffer, sessionId: string): Promise<VoiceResponse> {
-    // Convert speech to text
-    const transcription = await this.speechToText.transcribe(audioBlob);
+Enhanced knowledge management with new document types:
+
+```python
+class EnhancedKnowledgeManager:
+    """Enhanced knowledge management for advanced features."""
     
-    // Process banking command
-    const intent = await this.nlpProcessor.extractIntent(transcription);
-    const entities = await this.nlpProcessor.extractEntities(transcription);
+    def __init__(self):
+        self.chroma_client = ChromaDBClient()
+        self.collections = {
+            "banking_policies": "existing_banking_collection",
+            "gamification_rules": "gamification_knowledge",
+            "fraud_education": "fraud_prevention_guides",
+            "life_event_products": "life_event_recommendations",
+            "behavioral_patterns": "behavioral_intelligence"
+        }
     
-    // Route to appropriate agent
-    const agentResponse = await this.routeToAgent(intent, entities, sessionId);
-    
-    // Convert response to speech
-    const audioResponse = await this.textToSpeech.synthesize(agentResponse.text);
-    
-    return {
-      transcription,
-      responseText: agentResponse.text,
-      audioResponse,
-      confidence: agentResponse.confidence,
-      intent,
-      entities
-    };
-  }
-  
-  private async routeToAgent(intent: string, entities: any, sessionId: string): Promise<AgentResponse> {
-    const voiceCommands = {
-      'check_balance': async () => this.handleBalanceInquiry(entities, sessionId),
-      'transfer_money': async () => this.handleMoneyTransfer(entities, sessionId),
-      'block_card': async () => this.handleCardBlocking(entities, sessionId),
-      'loan_inquiry': async () => this.handleLoanInquiry(entities, sessionId)
-    };
-    
-    const handler = voiceCommands[intent];
-    return handler ? await handler() : { text: 'I did not understand that. Could you please repeat?', confidence: 0 };
-  }
-  
-  private async handleBalanceInquiry(entities: any, sessionId: string): Promise<AgentResponse> {
-    const customer = await this.getCustomerFromSession(sessionId);
-    const accounts = await this.accountService.getCustomerAccounts(customer.customerId);
-    
-    if (accounts.length === 1) {
-      const balance = accounts[0].balance;
-      return {
-        text: `Your account balance is ${balance} rupees.`,
-        confidence: 0.95
-      };
-    } else {
-      return {
-        text: `You have ${accounts.length} accounts. Which account balance would you like to check?`,
-        confidence: 0.90
-      };
-    }
-  }
-}
+    async def setup_enhanced_collections(self):
+        """Setup new collections for advanced features."""
+        # Gamification knowledge
+        await self.chroma_client.create_collection(
+            name="gamification_knowledge",
+            metadata={"description": "Gamification rules, badges, and challenges"}
+        )
+        
+        # Fraud education content
+        await self.chroma_client.create_collection(
+            name="fraud_prevention_guides",
+            metadata={"description": "Fraud prevention education and guidance"}
+        )
+        
+        # Life event recommendations
+        await self.chroma_client.create_collection(
+            name="life_event_recommendations",
+            metadata={"description": "Product recommendations for life events"}
+        )
 ```
+
+## Error Handling and Monitoring
+
+### Comprehensive Error Handling
+
+```python
+class AdvancedFeatureException(Exception):
+    """Base exception for advanced features."""
+    pass
+
+class GamificationException(AdvancedFeatureException):
+    """Exceptions related to gamification system."""
+    pass
+
+class BehavioralAnalysisException(AdvancedFeatureException):
+    """Exceptions related to behavioral analysis."""
+    pass
+
+class LifeEventDetectionException(AdvancedFeatureException):
+    """Exceptions related to life event detection."""
+    pass
+
+# Error handling middleware
+@app.exception_handler(AdvancedFeatureException)
+async def handle_advanced_feature_exception(request: Request, exc: AdvancedFeatureException):
+    """Handle advanced feature exceptions gracefully."""
+    logger.error(f"Advanced feature error: {exc}", exc_info=True)
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "advanced_feature_error",
+            "message": "An error occurred while processing advanced features",
+            "fallback_available": True
+        }
+    )
+```
+
+### Performance Monitoring
+
+```python
+class PerformanceMonitor:
+    """Monitor performance of advanced AI features."""
+    
+    def __init__(self):
+        self.metrics_collector = MetricsCollector()
+    
+    async def track_ml_inference_time(self, model_name: str, inference_time: float):
+        """Track ML model inference performance."""
+        await self.metrics_collector.record_metric(
+            metric_name="ml_inference_time",
+            value=inference_time,
+            tags={"model": model_name}
+        )
+    
+    async def track_recommendation_accuracy(self, recommendation_type: str, accuracy: float):
+        """Track recommendation system accuracy."""
+        await self.metrics_collector.record_metric(
+            metric_name="recommendation_accuracy",
+            value=accuracy,
+            tags={"type": recommendation_type}
+        )
+```
+
+## Security Considerations
+
+### Data Privacy and Protection
+
+```python
+class PrivacyProtectionService:
+    """Ensure privacy protection for behavioral data."""
+    
+    def __init__(self):
+        self.encryption_service = EncryptionService()
+        self.anonymization_service = AnonymizationService()
+    
+    async def protect_behavioral_data(self, behavioral_data: Dict) -> Dict:
+        """Apply privacy protection to behavioral data."""
+        # Remove direct identifiers
+        anonymized_data = await self.anonymization_service.anonymize(behavioral_data)
+        
+        # Encrypt sensitive patterns
+        encrypted_data = await self.encryption_service.encrypt_sensitive_fields(
+            anonymized_data, 
+            fields=["spending_patterns", "location_data", "interaction_history"]
+        )
+        
+        return encrypted_data
+    
+    async def ensure_consent_compliance(self, user_id: str, data_type: str) -> bool:
+        """Verify user consent for data usage."""
+        user_consents = await self.get_user_consents(user_id)
+        return data_type in user_consents and user_consents[data_type].is_active
+```
+
+### Secure ML Model Deployment
+
+```python
+class SecureMLService:
+    """Secure deployment and usage of ML models."""
+    
+    def __init__(self):
+        self.model_validator = ModelValidator()
+        self.access_controller = AccessController()
+    
+    async def validate_model_input(self, input_data: Dict, model_type: str) -> bool:
+        """Validate ML model input for security."""
+        # Check for injection attacks
+        if await self.detect_injection_attempts(input_data):
+            raise SecurityException("Potential injection attack detected")
+        
+        # Validate data types and ranges
+        return await self.model_validator.validate_input_schema(input_data, model_type)
+    
+    async def secure_model_inference(self, model_name: str, input_data: Dict) -> Dict:
+        """Perform secure ML model inference."""
+        # Validate access permissions
+        if not await self.access_controller.can_access_model(model_name):
+            raise PermissionException("Insufficient permissions for model access")
+        
+        # Validate input
+        await self.validate_model_input(input_data, model_name)
+        
+        # Perform inference with monitoring
+        return await self.execute_inference_with_monitoring(model_name, input_data)
+```
+
+## Testing Strategy
+
+### Unit Testing for New Components
+
+```python
+class TestGamificationAgent:
+    """Test suite for Gamification Agent."""
+    
+    async def test_point_calculation(self):
+        """Test points calculation for various tasks."""
+        agent = GamificationAgent()
+        
+        # Test different task types
+        tasks = [
+            ("transaction_complete", 10),
+            ("profile_update", 5),
+            ("challenge_complete", 50)
+        ]
+        
+        for task_type, expected_points in tasks:
+            points = await agent.calculate_points(task_type)
+            assert points == expected_points
+    
+    async def test_badge_earning(self):
+        """Test badge earning logic."""
+        agent = GamificationAgent()
+        user_profile = create_test_user_profile()
+        
+        # Complete enough tasks to earn a badge
+        for _ in range(10):
+            await agent.record_task_completion(user_profile.id, "transaction_complete")
+        
+        badges = await agent.check_earned_badges(user_profile.id)
+        assert len(badges) > 0
+        assert "Transaction Master" in [badge.name for badge in badges]
+
+class TestBehavioralIntelligence:
+    """Test suite for Behavioral Intelligence Agent."""
+    
+    async def test_pattern_detection(self):
+        """Test behavioral pattern detection."""
+        agent = BehavioralIntelligenceAgent()
+        transaction_history = create_test_transaction_history()
+        
+        patterns = await agent.detect_patterns(transaction_history)
+        
+        assert "spending_frequency" in patterns
+        assert "preferred_categories" in patterns
+        assert patterns["confidence_score"] > 0.7
+```
+
+### Integration Testing
+
+```python
+class TestAdvancedFeaturesIntegration:
+    """Integration tests for advanced features."""
+    
+    async def test_life_event_to_recommendation_flow(self):
+        """Test complete flow from life event detection to recommendation."""
+        # Setup test data
+        user_id = "test_user_123"
+        await self.setup_transaction_pattern_for_home_purchase(user_id)
+        
+        # Detect life event
+        life_events_agent = LifeEventsAgent()
+        events = await life_events_agent.detect_life_events(user_id)
+        
+        assert len(events) > 0
+        assert events[0].type == "home_purchase"
+        
+        # Generate recommendations
+        recommendations = await life_events_agent.generate_recommendations(events[0])
+        
+        assert "home_loan" in [rec.product_type for rec in recommendations]
+        assert "home_insurance" in [rec.product_type for rec in recommendations]
+    
+    async def test_gamification_integration_with_existing_agents(self):
+        """Test gamification integration with existing banking agents."""
+        user_id = "test_user_456"
+        
+        # Complete a banking task through Card Agent
+        card_agent = CardAgent()
+        gamification_agent = GamificationAgent()
+        
+        # Simulate card blocking
+        result = await card_agent.block_card(user_id, "1234567890123456")
+        
+        # Check if gamification points were awarded
+        profile = await gamification_agent.get_profile(user_id)
+        assert profile.total_points > 0
+        
+        # Check if appropriate challenge progress was updated
+        challenges = await gamification_agent.get_active_challenges(user_id)
+        security_challenge = next(
+            (c for c in challenges if c.category == "security"), 
+            None
+        )
+        assert security_challenge is not None
+        assert security_challenge.progress > 0
+```
+## Deployment Considerations
+
+### Infrastructure Requirements
+
+```yaml
+# Docker Compose additions for advanced features
+version: '3.8'
+services:
+  arthamind-backend:
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ML_MODEL_PATH=/app/models
+      - BEHAVIORAL_ANALYSIS_ENABLED=true
+      - GAMIFICATION_ENABLED=true
+    volumes:
+      - ./models:/app/models
+      - ./ml_cache:/app/cache
+    
+  # New ML inference service
+  ml-service:
+    image: arthamind/ml-service:latest
+    ports:
+      - "8001:8001"
+    environment:
+      - MODEL_CACHE_SIZE=1000
+      - INFERENCE_TIMEOUT=5000
+    volumes:
+      - ./models:/models
+      - ./ml_logs:/logs
+    
+  # Enhanced Redis for caching
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+```
+
+### Environment Configuration
+
+```python
+class AdvancedFeaturesSettings(BaseSettings):
+    """Configuration for advanced AI features."""
+    
+    # Gamification settings
+    gamification_enabled: bool = True
+    points_per_transaction: int = 10
+    tier_thresholds: Dict[str, int] = {
+        "Bronze": 0,
+        "Silver": 1000,
+        "Gold": 5000,
+        "Platinum": 15000
+    }
+    
+    # Behavioral intelligence settings
+    behavioral_analysis_enabled: bool = True
+    ml_model_cache_size: int = 1000
+    pattern_detection_threshold: float = 0.7
+    recommendation_refresh_hours: int = 24
+    
+    # Life events settings
+    life_event_detection_enabled: bool = True
+    confidence_threshold: float = 0.8
+    analysis_window_days: int = 90
+    
+    # ML service settings
+    ml_service_url: str = "http://localhost:8001"
+    gemini_api_key: str
+    model_inference_timeout: int = 5000
+    
+    # Security settings
+    behavioral_data_encryption: bool = True
+    consent_required_for_analysis: bool = True
+    data_retention_days: int = 365
+```
+
 ## Correctness Properties
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-### Property 1: Authentication Session Creation
-*For any* valid demo credentials provided by a customer, the authentication service SHALL create a secure session with valid JWT tokens
-**Validates: Requirements 1.1**
+Based on the prework analysis, here are the key correctness properties for the ArthaMind system:
 
-### Property 2: Invalid Credential Rejection
-*For any* invalid credentials (wrong password, non-existent user, etc.), the authentication service SHALL reject the login attempt and maintain system security
-**Validates: Requirements 1.2**
+### Property 1: Authentication Session Management
 
-### Property 3: JWT Token State Consistency
-*For any* active customer session, the JWT token SHALL maintain valid authentication state across all system requests
-**Validates: Requirements 1.3**
+*For any* valid customer credentials, the authentication system SHALL create a secure session with proper JWT tokens and maintain authentication state throughout the session lifecycle.
 
-### Property 4: Intent Classification Accuracy
-*For any* customer query, the Router Agent SHALL classify the banking intent with at least 90% accuracy
+**Validates: Requirements 1.1, 1.3**
+
+### Property 2: Input Validation Consistency
+
+*For any* invalid input (credentials, transaction data, document uploads), the system SHALL consistently reject the input and provide appropriate error messaging without compromising security.
+
+**Validates: Requirements 1.2, 8.1**
+
+### Property 3: Agent Routing Accuracy
+
+*For any* customer query, the Router Agent SHALL analyze the intent and route to the appropriate specialized agent with at least 90% accuracy, maintaining this performance across all query types.
+
 **Validates: Requirements 2.2, 13.1**
 
-### Property 5: Conversation Context Preservation
-*For any* multi-turn conversation, the Memory Agent SHALL maintain conversation context across agent handoffs within the same session
+### Property 4: Context Preservation Across Handoffs
+
+*For any* conversation session, when agents hand off queries to specialized agents, the Memory Agent SHALL preserve complete conversation context without loss of information.
+
 **Validates: Requirements 2.3, 13.3**
 
-### Property 6: AI Response Time Performance
-*For any* customer query, the AI Banking Assistant SHALL provide responses within 3 seconds
-**Validates: Requirements 2.5**
+### Property 5: Response Time Performance
 
-### Property 7: Account Data Completeness
-*For any* customer accessing account overview, the system SHALL display current balances for all linked accounts
-**Validates: Requirements 3.1**
+*For any* customer query, the AI Banking Assistant SHALL provide responses within 3 seconds, and FAQ Agent SHALL retrieve knowledge base information within 1 second.
 
-### Property 8: Transaction Data Integrity
-*For any* transaction history request, the system SHALL show transactions with all required fields (date, amount, description, balance)
-**Validates: Requirements 3.2**
+**Validates: Requirements 2.5, 15.3**
 
-### Property 9: Account Number Security Masking
-*For any* account number displayed, the system SHALL mask the number showing only the last 4 digits
-**Validates: Requirements 3.4**
+### Property 6: Data Masking Security
 
-### Property 10: Data Retrieval Performance
-*For any* transaction data request, the system SHALL retrieve information from simulated data within 2 seconds
-**Validates: Requirements 3.5**
+*For any* account number or card number displayed in the system, sensitive information SHALL be masked showing only the last 4 digits regardless of the original format.
 
-### Property 11: Card Display Security
-*For any* customer viewing their cards, the system SHALL display all active cards with properly masked card numbers
-**Validates: Requirements 4.1**
+**Validates: Requirements 3.4, 4.1**
 
-### Property 12: Card Blocking Confirmation
-*For any* card blocking request, the Card Agent SHALL immediately block the card and send confirmation
-**Validates: Requirements 4.2**
+### Property 7: Transaction Data Consistency
 
-### Property 13: EMI Calculation Accuracy
-*For any* loan parameters (amount, interest rate, tenure), the EMI calculator SHALL compute mathematically correct monthly payments
-**Validates: Requirements 5.3**
+*For any* transaction display request, the system SHALL show complete transaction information including date, amount, description, and balance with data retrieved within 2 seconds.
 
-### Property 14: Loan Eligibility Calculation
-*For any* customer financial profile, the Loan Agent SHALL calculate eligibility based on income, credit score, and existing obligations
-**Validates: Requirements 5.1**
+**Validates: Requirements 3.2, 3.5**
 
-### Property 15: Fixed Deposit Maturity Calculation
-*For any* FD parameters (amount, rate, tenure), the Investment Agent SHALL calculate correct maturity amount and confirmation
-**Validates: Requirements 6.2**
+### Property 8: Card Operations Reliability
 
-### Property 16: Speech Processing Pipeline
-*For any* voice command input, the system SHALL convert speech to text and process the banking request correctly
-**Validates: Requirements 7.2**
+*For any* card management operation (blocking, lost card reporting), the Card Agent SHALL immediately execute the operation and provide confirmation to the customer.
 
-### Property 17: Voice Command Recognition
-*For any* common banking voice commands, the system SHALL correctly recognize and process balance inquiry and transaction history requests
-**Validates: Requirements 7.4**
+**Validates: Requirements 4.2, 4.3**
 
-### Property 18: Document Format Validation
-*For any* document upload, the system SHALL accept PDF, JPG, and PNG formats while rejecting other formats
-**Validates: Requirements 8.1**
+### Property 9: Fraud Detection and Notification
 
-### Property 19: OCR Text Extraction
-*For any* uploaded document with text content, the OCR system SHALL extract text content accurately
-**Validates: Requirements 8.2**
+*For any* suspicious activity detected, the Fraud Agent SHALL immediately generate a Fraud Alert and notify both the customer and relevant bank staff through appropriate channels.
 
-### Property 20: Escalation Context Transfer
-*For any* escalated case, the Human Agent Portal SHALL display complete conversation history and customer context
-**Validates: Requirements 9.1**
+**Validates: Requirements 4.5, 10.1, 10.2**
 
-### Property 21: Fraud Alert Generation
-*For any* suspicious transaction pattern detected, the Fraud Agent SHALL generate a fraud alert immediately
-**Validates: Requirements 10.1**
+### Property 10: Loan Calculation Accuracy
 
-### Property 22: Fraud Detection Analysis
-*For any* transaction, the Fraud Agent SHALL analyze amounts, frequency, and merchant patterns to identify anomalies
-**Validates: Requirements 10.3**
+*For any* loan parameters (amount, interest rate, tenure), the Loan Agent SHALL compute EMI calculations that are mathematically correct and consistent.
 
-### Property 23: Multi-Channel Notification Delivery
-*For any* important account event, the system SHALL send notifications through multiple channels (email, SMS, in-app)
-**Validates: Requirements 12.1, 12.2**
+**Validates: Requirements 5.1, 5.3**
 
-### Property 24: Notification Preference Application
-*For any* customer notification preference configuration, the system SHALL save and apply preferences correctly
-**Validates: Requirements 12.3**
+### Property 11: Investment Information Completeness
 
-### Property 25: Agent Transfer Logic
-*For any* query requiring specialized handling, the system SHALL seamlessly transfer to an appropriate specialized agent
-**Validates: Requirements 13.4**
+*For any* investment or fixed deposit, the system SHALL display all required information including current value, returns, maturity dates, and provide accurate maturity calculations.
 
-### Property 26: Data Encryption Compliance
-*For any* customer data operation, the system SHALL encrypt all data both in transit and at rest
-**Validates: Requirements 14.1**
+**Validates: Requirements 6.1, 6.2, 6.4**
 
-### Property 27: Authorization Validation
-*For any* customer information access request, the system SHALL validate user authorization levels correctly
-**Validates: Requirements 14.2**
+### Property 12: Voice Banking Processing
 
-### Property 28: Sensitive Data Masking
-*For any* logging or audit trail operation, the system SHALL mask sensitive information properly
-**Validates: Requirements 14.3**
+*For any* voice banking interaction, the system SHALL convert speech to text, process the request, and provide audio responses while supporting common banking commands.
 
-### Property 29: Knowledge Retrieval Performance
-*For any* FAQ query, the system SHALL retrieve relevant information from the knowledge base within 1 second
-**Validates: Requirements 15.3**
+**Validates: Requirements 7.2, 7.3, 7.4**
 
-### Property 30: Document Indexing Automation
-*For any* new banking document added to the system, the system SHALL automatically index it for RAG retrieval
-**Validates: Requirements 15.4**
+### Property 13: Document Processing Workflow
 
-### Property 31: Source Attribution Completeness
-*For any* knowledge-based response, the system SHALL provide proper source attribution
-**Validates: Requirements 15.5**
+*For any* uploaded document in supported formats (PDF, JPG, PNG), the system SHALL use OCR to extract text, validate the information, and provide processing status updates.
 
-## Error Handling and Edge Cases
+**Validates: Requirements 8.2, 8.3, 8.4**
 
-### Graceful Degradation Strategy
-- **AI Agent Failure**: Automatic fallback to simpler rule-based responses
-- **Database Unavailability**: Cached data serving with staleness indicators  
-- **External Service Failure**: Queue requests for retry with user notification
-- **Authentication Issues**: Secure logout with session cleanup
+### Property 14: Multi-Channel Notification Delivery
 
-### Input Validation Framework
-- **SQL Injection Prevention**: Parameterized queries and input sanitization
-- **XSS Protection**: Content Security Policy and output encoding
-- **Rate Limiting**: Request throttling per user and endpoint
-- **File Upload Security**: Type validation, size limits, and virus scanning
+*For any* important account event, the system SHALL send notifications through all configured channels (email, SMS, in-app) and track delivery status with retry logic for failures.
 
-### Performance Optimization
-- **Database Query Optimization**: Proper indexing and query caching
-- **API Response Caching**: Redis-based caching for frequently accessed data
-- **Image Optimization**: Lazy loading and WebP format conversion
-- **Bundle Optimization**: Code splitting and tree shaking for frontend
+**Validates: Requirements 12.1, 12.2, 12.4**
 
-## Deployment Architecture
+### Property 15: Data Encryption and Authorization
 
-### Containerization Strategy
-```yaml
-# Docker composition for microservices
-version: '3.8'
-services:
-  api-gateway:
-    image: arthamind/api-gateway:latest
-    ports:
-      - "8080:8080"
-    environment:
-      - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
-      - REDIS_URL=${REDIS_URL}
-      
-  customer-service:
-    image: arthamind/customer-service:latest
-    environment:
-      - DATABASE_URL=${POSTGRES_URL}
-      - REDIS_URL=${REDIS_URL}
-      
-  ai-orchestration:
-    image: arthamind/ai-orchestration:latest
-    environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - CHROMADB_URL=${CHROMADB_URL}
-      
-  postgres:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=arthamind
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-      
-  chromadb:
-    image: chromadb/chroma:latest
-    ports:
-      - "8000:8000"
-    volumes:
-      - chromadb_data:/chroma/chroma
+*For any* customer data operation, the system SHALL encrypt data both in transit and at rest, validate user authorization levels, and mask sensitive information in logs.
+
+**Validates: Requirements 14.1, 14.2, 14.3**
+
+### Property 16: RAG System Performance
+
+*For any* agent requiring banking information, the system SHALL query the RAG system using ChromaDB, maintain updated knowledge base, and provide source attribution for all responses.
+
+**Validates: Requirements 15.1, 15.2, 15.5**
+
+### Property 17: Agent Coordination Workflow
+
+*For any* complex query requiring multiple agents, the system SHALL coordinate agents using LangGraph workflows while maintaining conversation context and enabling seamless transfers between agents.
+
+**Validates: Requirements 13.2, 13.4**
+
+### Property 18: Escalation Management
+
+*For any* query that cannot be resolved by AI or requires human intervention, the Human Handoff Agent SHALL escalate to the Human Agent Portal with complete conversation history and customer context.
+
+**Validates: Requirements 2.4, 9.1**
+
+### Property 19: Analytics and Monitoring Completeness
+
+*For any* analytics request, the Manager Dashboard SHALL display real-time metrics including AI resolution rates, customer satisfaction scores, and agent activity with drill-down capabilities.
+
+**Validates: Requirements 11.1, 11.2, 11.3**
+
+### Property 20: Security Standards Compliance
+
+*For any* system operation, the ArthaMind system SHALL ensure compliance with banking security standards, implement secure data deletion procedures, and maintain audit trails.
+
+**Validates: Requirements 14.4, 14.5**
+
+## Scalability and Performance
+
+### Horizontal Scaling Strategy
+
+The advanced features are designed for horizontal scaling:
+
+```python
+class ScalableMLService:
+    """Scalable ML service architecture."""
+    
+    def __init__(self):
+        self.model_pool = ModelPool()
+        self.load_balancer = MLLoadBalancer()
+        self.cache_manager = DistributedCache()
+    
+    async def distribute_inference_load(self, requests: List[InferenceRequest]) -> List[InferenceResult]:
+        """Distribute ML inference across multiple instances."""
+        # Group requests by model type
+        grouped_requests = self.group_by_model_type(requests)
+        
+        # Distribute across available instances
+        results = []
+        for model_type, model_requests in grouped_requests.items():
+            instance = await self.load_balancer.get_available_instance(model_type)
+            batch_results = await instance.process_batch(model_requests)
+            results.extend(batch_results)
+        
+        return results
 ```
 
-### Monitoring and Observability
-- **Application Metrics**: Prometheus and Grafana dashboards
-- **Log Aggregation**: ELK stack for centralized logging
-- **Error Tracking**: Sentry for error monitoring and alerting
-- **Performance Monitoring**: New Relic for APM and user experience tracking
-- **Health Checks**: Kubernetes liveness and readiness probes
+### Caching Strategy
 
-This comprehensive technical design provides the foundation for implementing ArthaMind as a production-ready AI banking simulator with robust security, scalability, and maintainability features.
+```python
+class AdvancedCachingStrategy:
+    """Sophisticated caching for advanced features."""
+    
+    def __init__(self):
+        self.redis_client = RedisClient()
+        self.local_cache = LRUCache(maxsize=1000)
+    
+    async def cache_behavioral_insights(self, user_id: str, insights: BehavioralInsights):
+        """Cache behavioral insights with appropriate TTL."""
+        cache_key = f"behavioral_insights:{user_id}"
+        
+        # Cache locally for fast access
+        self.local_cache.set(cache_key, insights)
+        
+        # Cache in Redis for distributed access
+        await self.redis_client.setex(
+            cache_key, 
+            ttl=3600,  # 1 hour TTL
+            value=insights.json()
+        )
+    
+    async def invalidate_user_cache(self, user_id: str, cache_types: List[str]):
+        """Invalidate specific cache types for user."""
+        for cache_type in cache_types:
+            cache_key = f"{cache_type}:{user_id}"
+            self.local_cache.delete(cache_key)
+            await self.redis_client.delete(cache_key)
+```
+
+## Conclusion
+
+This technical design provides a comprehensive architecture for ArthaMind's Advanced AI features while maintaining seamless integration with existing components. The design emphasizes:
+
+1. **Scalability**: Horizontal scaling capabilities for ML services and behavioral analysis
+2. **Security**: Comprehensive data protection and privacy compliance
+3. **Performance**: Efficient caching and optimized inference pipelines
+4. **Maintainability**: Clean separation of concerns and modular architecture
+5. **Testability**: Comprehensive testing strategy with property-based testing integration
+
+The implementation follows best practices for AI/ML system design while ensuring compatibility with the existing LangGraph multi-agent architecture and FastAPI backend infrastructure.
