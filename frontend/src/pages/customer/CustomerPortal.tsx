@@ -7,6 +7,12 @@ import Loans from './Loans';
 import FixedDeposits from './FixedDeposits';
 import AIChat from './AIChat';
 import Notifications from './Notifications';
+import Rewards from './Rewards';
+import LifeEvents from './LifeEvents';
+import Insights from './Insights';
+import FraudAwareness from './FraudAwareness';
+import BillAutopay from './BillAutopay';
+import PrivacyControls from './PrivacyControls';
 
 export default function CustomerPortal() {
   return (
@@ -19,6 +25,12 @@ export default function CustomerPortal() {
         <Route path="fd" element={<FixedDeposits />} />
         <Route path="chat" element={<AIChat />} />
         <Route path="notifications" element={<Notifications />} />
+        <Route path="rewards" element={<Rewards />} />
+        <Route path="life-events" element={<LifeEvents />} />
+        <Route path="insights" element={<Insights />} />
+        <Route path="fraud-awareness" element={<FraudAwareness />} />
+        <Route path="bill-autopay" element={<BillAutopay />} />
+        <Route path="privacy" element={<PrivacyControls />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>

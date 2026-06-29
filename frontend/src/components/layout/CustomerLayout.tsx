@@ -1,22 +1,45 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
-import { Building2, LayoutDashboard, CreditCard, Landmark, PiggyBank, MessageSquare, Bell, LogOut, Wallet } from 'lucide-react';
+
+import {
+  Building2,
+  LayoutDashboard,
+  CreditCard,
+  Landmark,
+  PiggyBank,
+  MessageSquare,
+  Bell,
+  LogOut,
+  Wallet,
+  Trophy,
+  Sparkles,
+  Brain,
+  ShieldAlert,
+  Receipt,
+  Lock,
+} from 'lucide-react';
 import { NOTIFICATIONS } from '../../data/mockData';
 
 const NAV = [
-  { to: '/dashboard',          label: 'Dashboard',       icon: LayoutDashboard },
-  { to: '/dashboard/accounts', label: 'Accounts',        icon: Wallet },
-  { to: '/dashboard/cards',    label: 'Cards',           icon: CreditCard },
-  { to: '/dashboard/loans',    label: 'Loans',           icon: Landmark },
-  { to: '/dashboard/fd',       label: 'Fixed Deposits',  icon: PiggyBank },
-  { to: '/dashboard/chat',     label: 'AI Assistant',    icon: MessageSquare },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard/accounts', label: 'Accounts', icon: Wallet },
+  { to: '/dashboard/cards', label: 'Cards', icon: CreditCard },
+  { to: '/dashboard/loans', label: 'Loans', icon: Landmark },
+  { to: '/dashboard/fd', label: 'Fixed Deposits', icon: PiggyBank },
+  { to: '/dashboard/chat', label: 'AI Assistant', icon: MessageSquare },
+  { to: '/dashboard/rewards', label: 'Rewards', icon: Trophy },
+  { to: '/dashboard/life-events', label: 'Life Events', icon: Sparkles },
+  { to: '/dashboard/insights', label: 'AI Insights', icon: Brain },
+  { to: '/dashboard/fraud-awareness', label: 'Fraud Awareness', icon: ShieldAlert },
+  { to: '/dashboard/bill-autopay', label: 'Bill Autopay', icon: Receipt },
+  { to: '/dashboard/privacy', label: 'Privacy', icon: Lock },
   { to: '/dashboard/notifications', label: 'Notifications', icon: Bell },
 ];
 
 export default function CustomerLayout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
-  const unread = NOTIFICATIONS.filter(n => !n.read).length;
+  const unread = NOTIFICATIONS.filter((n) => !n.read).length;
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -36,22 +59,36 @@ export default function CustomerLayout() {
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
           {NAV.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} end={to === '/dashboard'}
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/dashboard'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  isActive ? 'bg-white text-blue-900 font-semibold' : 'text-blue-200 hover:bg-blue-800 hover:text-white'
-                }`}>
+                  isActive
+                    ? 'bg-white text-blue-900 font-semibold'
+                    : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+                }`
+              }
+            >
               <Icon className="w-4 h-4 shrink-0" />
               <span>{label}</span>
               {label === 'Notifications' && unread > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{unread}</span>
+                <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {unread}
+                </span>
               )}
             </NavLink>
           ))}
         </nav>
 
-        <button onClick={() => { logout(); nav('/login'); }}
-          className="m-3 flex items-center gap-2 text-blue-300 hover:text-white text-sm p-3 rounded-lg hover:bg-blue-800 transition">
+        <button
+          onClick={() => {
+            logout();
+            nav('/login');
+          }}
+          className="m-3 flex items-center gap-2 text-blue-300 hover:text-white text-sm p-3 rounded-lg hover:bg-blue-800 transition"
+        >
           <LogOut className="w-4 h-4" /> Logout
         </button>
       </aside>
