@@ -23,6 +23,7 @@ python_version = "3.11"
 strict = true
 ignore_missing_imports = true
 exclude = ["venv", "dist", "build"]
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

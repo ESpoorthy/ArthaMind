@@ -8,6 +8,25 @@ interface ConsentToggle {
   on: boolean;
 }
 
+interface PrivacyToggleBtnProps {
+  on: boolean;
+  onToggle: () => void;
+}
+
+function ToggleBtn({ on, onToggle }: PrivacyToggleBtnProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${on ? 'bg-blue-600' : 'bg-gray-300'}`}
+      aria-pressed={on}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`}
+      />
+    </button>
+  );
+}
+
 export default function PrivacyControls() {
   const [consents, setConsents] = useState<ConsentToggle[]>([
     {
@@ -49,18 +68,6 @@ export default function PrivacyControls() {
     setDeleteSuccess(true);
     setTimeout(() => setDeleteSuccess(false), 4000);
   };
-
-  const ToggleBtn = ({ on, onToggle }: { on: boolean; onToggle: () => void }) => (
-    <button
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${on ? 'bg-blue-600' : 'bg-gray-300'}`}
-      aria-pressed={on}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`}
-      />
-    </button>
-  );
 
   const privacyScore = 78;
 

@@ -68,6 +68,25 @@ function getStatusBadge(status: Bill['status']) {
   }
 }
 
+interface ToggleBtnProps {
+  on: boolean;
+  onToggle: () => void;
+}
+
+function ToggleBtn({ on, onToggle }: ToggleBtnProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${on ? 'bg-blue-600' : 'bg-gray-300'}`}
+      aria-pressed={on}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`}
+      />
+    </button>
+  );
+}
+
 export default function BillAutopay() {
   const [bills, setBills] = useState<Bill[]>(INITIAL_BILLS);
   const [autopayToast, setAutopayToast] = useState<string | null>(null);
@@ -94,18 +113,6 @@ export default function BillAutopay() {
       }),
     );
   };
-
-  const ToggleBtn = ({ on, onToggle }: { on: boolean; onToggle: () => void }) => (
-    <button
-      onClick={onToggle}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${on ? 'bg-blue-600' : 'bg-gray-300'}`}
-      aria-pressed={on}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${on ? 'translate-x-6' : 'translate-x-1'}`}
-      />
-    </button>
-  );
 
   return (
     <div className="p-6 space-y-6">

@@ -29,7 +29,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _get_client_key(self, request: Request) -> str:
         forwarded_for = request.headers.get("X-Forwarded-For")
-        ip = forwarded_for.split(",")[0].strip() if forwarded_for else (request.client.host if request.client else "unknown")
+        ip = (
+            forwarded_for.split(",")[0].strip()
+            if forwarded_for
+            else (request.client.host if request.client else "unknown")
+        )
         return f"{ip}:{request.url.path}"
 
     def _is_allowed(self, key: str, limit: int) -> bool:

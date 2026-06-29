@@ -2,7 +2,6 @@
 
 import logging
 import sys
-from typing import Any
 
 from src.config.settings import get_settings
 

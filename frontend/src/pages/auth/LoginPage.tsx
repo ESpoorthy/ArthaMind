@@ -7,7 +7,8 @@ export default function LoginPage() {
   const nav = useNavigate();
 
   const handle = (role: 'customer' | 'agent' | 'manager', path: string) => {
-    login(role); nav(path);
+    login(role);
+    nav(path);
   };
 
   return (
@@ -25,10 +26,14 @@ export default function LoginPage() {
 
         {/* Demo Login Cards */}
         <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
-          <p className="text-white text-center text-sm font-medium mb-5">Select a demo portal to explore</p>
+          <p className="text-white text-center text-sm font-medium mb-5">
+            Select a demo portal to explore
+          </p>
           <div className="space-y-3">
-            <button onClick={() => handle('customer', '/dashboard')}
-              className="w-full bg-white text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-blue-50 transition-all shadow font-medium">
+            <button
+              onClick={() => handle('customer', '/dashboard')}
+              className="w-full bg-white text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-blue-50 transition-all shadow font-medium"
+            >
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                 <UserCircle className="w-6 h-6 text-blue-700" />
               </div>
@@ -38,8 +43,10 @@ export default function LoginPage() {
               </div>
             </button>
 
-            <button onClick={() => handle('agent', '/agent')}
-              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium">
+            <button
+              onClick={() => handle('agent', '/agent')}
+              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium"
+            >
               <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                 <Headphones className="w-6 h-6 text-green-700" />
               </div>
@@ -49,8 +56,10 @@ export default function LoginPage() {
               </div>
             </button>
 
-            <button onClick={() => handle('manager', '/manager')}
-              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium">
+            <button
+              onClick={() => handle('manager', '/manager')}
+              className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium"
+            >
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-purple-700" />
               </div>

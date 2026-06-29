@@ -4,7 +4,8 @@
   "description": "ArthaMind AI Banking Simulator - A comprehensive AI-powered banking platform with multi-agent architecture",
   "private": true,
   "workspaces": [
-    "frontend"
+    "frontend",
+    "shared"
   ],
   "scripts": {
     "dev:frontend": "npm run dev --workspace=frontend",
@@ -30,8 +31,10 @@
     "typescript": "^5.3.3"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
+    "frontend/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "shared/**/*.ts": [
       "prettier --write"
     ],
     "*.{json,md}": [

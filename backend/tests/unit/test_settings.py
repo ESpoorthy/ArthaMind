@@ -1,6 +1,7 @@
 """Unit tests for application settings (Task 1.7)."""
-import os
+
 import pytest
+
 from src.config.settings import Settings
 
 
@@ -9,6 +10,7 @@ def test_settings_defaults():
     s = Settings(
         secret_key="a_secret_key_that_is_long_enough_32c",
         refresh_secret_key="a_refresh_key_that_is_long_enough_32",
+        environment="development",
     )
     assert s.app_name == "ArthaMind"
     assert s.environment == "development"

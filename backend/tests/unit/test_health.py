@@ -1,13 +1,13 @@
 """Integration-style test for health endpoints (Task 1.7)."""
+
 import os
 
 os.environ.setdefault("SECRET_KEY", "test_secret_key_minimum_32_chars_long_xx")
 os.environ.setdefault("REFRESH_SECRET_KEY", "test_refresh_key_min_32_chars_long_xx")
 
-import pytest
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
 
-from src.main import app
+from src.main import app  # noqa: E402
 
 client = TestClient(app)
 

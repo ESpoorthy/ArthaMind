@@ -2,10 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { AuthProvider } from './store/authStore';
 
-const LoginPage      = lazy(() => import('./pages/auth/LoginPage'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const CustomerPortal = lazy(() => import('./pages/customer/CustomerPortal'));
-const AgentPortal    = lazy(() => import('./pages/agent/AgentPortal'));
-const ManagerPortal  = lazy(() => import('./pages/manager/ManagerPortal'));
+const AgentPortal = lazy(() => import('./pages/agent/AgentPortal'));
+const ManagerPortal = lazy(() => import('./pages/manager/ManagerPortal'));
 
 function Loader() {
   return (
@@ -21,12 +21,12 @@ export default function App() {
       <BrowserRouter>
         <Suspense fallback={<Loader />}>
           <Routes>
-            <Route path="/login"       element={<LoginPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard/*" element={<CustomerPortal />} />
-            <Route path="/agent"       element={<AgentPortal />} />
-            <Route path="/manager"     element={<ManagerPortal />} />
-            <Route path="/"            element={<Navigate to="/login" replace />} />
-            <Route path="*"            element={<Navigate to="/login" replace />} />
+            <Route path="/agent" element={<AgentPortal />} />
+            <Route path="/manager" element={<ManagerPortal />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

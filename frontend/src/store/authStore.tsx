@@ -2,8 +2,18 @@ import React, { createContext, useContext, useState } from 'react';
 import { DEMO_USERS } from '../data/mockData';
 
 type Role = 'customer' | 'agent' | 'manager';
-interface User { id: string; name: string; email: string; role: Role; accountId: string; }
-interface AuthCtx { user: User | null; login: (role: Role) => void; logout: () => void; }
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  accountId: string;
+}
+interface AuthCtx {
+  user: User | null;
+  login: (role: Role) => void;
+  logout: () => void;
+}
 
 const AuthContext = createContext<AuthCtx>({ user: null, login: () => {}, logout: () => {} });
 

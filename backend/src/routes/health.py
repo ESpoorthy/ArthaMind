@@ -1,7 +1,6 @@
 """Health-check and readiness endpoints."""
 
 import time
-from typing import Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
