@@ -1,6 +1,6 @@
 # ArthaMind — Agentic AI Banking Simulator
 
-> Built for SBI Hackathon 2026 · Powered by Gemini 2.5 Flash · LangGraph Multi-Agent Architecture
+> Powered by Gemini 2.5 Flash · LangGraph Multi-Agent Architecture
 
 ArthaMind is a production-quality AI banking simulator that demonstrates agentic AI capabilities across a full banking platform — without connecting to real banking APIs.
 
