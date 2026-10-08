@@ -1,87 +1,78 @@
-# ArthaMind — Agentic AI Banking Simulator
+# ArthaMind Z-Sentinel
 
-> Powered by Gemini 2.5 Flash · LangGraph Multi-Agent Architecture
+> Real-Time AI for Critical Financial Decisions
 
-ArthaMind is a production-quality AI banking simulator that demonstrates agentic AI capabilities across a full banking platform — without connecting to real banking APIs.
+## 1. Problem and timing
 
-## Architecture
+Critical transactions need an explainable decision before an intervention becomes too
+late. Z-Sentinel evaluates an incoming event and pushes the completed decision to the
+browser without refresh.
 
-| Layer | Technology |
-|-------|-----------|
-| Backend API | FastAPI (Python 3.11), SQLAlchemy, Alembic |
-| Database | PostgreSQL 16, Redis 7 |
-| Vector DB | ChromaDB (RAG) |
-| AI / LLM | Gemini 2.5 Flash, LangGraph, LangChain |
-| Frontend | React 18, TypeScript, Tailwind CSS, Vite |
-| Auth | JWT (access + refresh tokens) |
-| Deployment | Docker, Docker Compose |
+## 2. Solution and architecture
 
-## Portals
+**IMPLEMENTED:** bounded simulation, transaction-time features, XGBoost probability,
+independent Isolation Forest anomaly score, deterministic rules/fusion/policy,
+explanations, JWT/RBAC manager review, WebSocket delivery, audit events, impact comparison
+and reasoned human overrides.
 
-- **Customer Portal** — dashboard, accounts, cards, loans, FDs, AI chat, voice banking
-- **Human Agent Portal** — live support, escalated cases, AI-suggested replies
-- **Manager Dashboard** — analytics, fraud alerts, AI performance metrics
+**SIMULATED:** transactions and training data are synthetic.
 
-## Quick Start
+**PLANNED / REQUIRES IBM Z ENVIRONMENT:** a live IBM ML for z/OS scoring endpoint.
+
+```
+transaction → transactions:incoming → features → ML + anomaly + rules
+→ risk assessment → deterministic policy → explanation/audit
+→ transactions:scored + decisions:completed → WebSocket → Decision Centre
+```
+
+PostgreSQL is the persistence target and Redis Streams the event transport. Docker mode
+sets `REQUIRE_REAL_INFRASTRUCTURE=true` so Redis cannot silently fall back.
+
+## 3. ML, decisioning and explainability
+
+Default fusion is `0.50 × ML + 0.30 × anomaly + 0.20 × rules`. Inputs are available at
+transaction time; raw device fingerprints are not model or UI inputs. The LLM cannot
+change a score, confidence, threshold, or decision. The deterministic explanation works
+without Gemini.
+
+## 4. Security and human review
+
+Manager APIs/WebSocket require signed JWTs and manager RBAC. Reviews record AI decision,
+human decision, reviewer, reason, timestamp, and correlation ID. Impact comparisons show
+friction and workload assumptions only—never guaranteed savings.
+
+## 5. IBM Z integration
+
+`LocalInferenceProvider` is functional. `IBMZInferenceProvider` validates configuration
+and fails closed; it does not fabricate IBM Z results. A verified IBM ML for z/OS endpoint
+would use the same features and preserve correlation ID, model version, timestamp, latency,
+and inference mode. No IBM Z deployment is claimed.
+
+## 6. Dataset methodology
+
+See [backend/models/MODEL_METHODOLOGY.md](backend/models/MODEL_METHODOLOGY.md). Perfect
+scores from the original synthetic generator are not fraud-performance claims. The
+mixed-signal challenge result is deliberately visible: precision **1.000**, recall
+**0.026**, F1 **0.051**, ROC-AUC **0.513**. Real deployment needs temporally split,
+customer-separated governed data and monitoring.
+
+## 7. Demo
+
+1. Choose Manager and open Z-Sentinel Decision Centre.
+2. Start the bounded demo: NORMAL → APPROVE, then MULTI_SIGNAL_HIGH_RISK → CRITICAL → HOLD.
+3. Inspect signals and explanation; simulate alternatives.
+4. Confirm HOLD or override to STEP-UP with a required reason; inspect the audit trail.
+
+## 8. Limitations and setup
+
+- Docker/Redis/PostgreSQL validation still requires a machine with Docker installed.
+- Synthetic metrics are not production metrics.
+- IBM Z connectivity requires a licensed, reachable environment.
 
 ```bash
-# 1. Copy environment config
 cp .env.example .env
-# Fill in GEMINI_API_KEY and SECRET_KEY in .env
-
-# 2. Start all services
-docker-compose up -d
-
-# 3. Run database migrations (Phase 2+)
-docker-compose exec backend alembic upgrade head
-
-# 4. Open the app
-open http://localhost:5173
+docker compose up --build
 ```
 
-## Development
-
-```bash
-# Backend (Python)
-cd backend
-pip install -r requirements-dev.txt
-uvicorn src.main:app --reload
-
-# Frontend (Node)
-cd frontend
-npm install
-npm run dev
-
-# Run tests
-cd backend && python -m pytest tests/ -v
-cd frontend && npx vitest run
-```
-
-## Project Structure
-
-```
-ArthaMind/
-├── backend/          # FastAPI application
-│   ├── src/
-│   │   ├── agents/   # LangGraph AI agents
-│   │   ├── config/   # Settings & environment
-│   │   ├── middleware/
-│   │   ├── models/   # SQLAlchemy models (Phase 2)
-│   │   ├── routes/   # API endpoints
-│   │   └── services/ # Business logic
-│   └── tests/
-├── frontend/         # React + Vite application
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       └── services/
-├── shared/           # Shared TypeScript types & utilities
-├── docker/           # Docker configs & init scripts
-├── .github/workflows/ # CI/CD pipelines
-└── .kiro/specs/      # Project specification
-```
-
-## CI / CD
-
-- **CI** — runs on every push/PR: lint → type-check → tests → build → security scan → Docker build
-- **Deploy** — pushes Docker images to GHCR on merge to `main`
+Run local checks with `cd backend && python -m pytest -o addopts='' tests/unit -q`,
+`python -m scripts.evaluate_models`, `npm run build:frontend`, and `npm run lint:frontend`.

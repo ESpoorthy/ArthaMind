@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     redis_url: str = "redis://localhost:6379/0"
     redis_ttl_seconds: int = 3600
+    require_real_infrastructure: bool = False
 
     # ------------------------------------------------------------------
     # ChromaDB
@@ -128,7 +129,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     inference_provider: Literal["local", "ibmz"] = "local"
     worker_batch_size: int = Field(default=1, ge=1)
-    model_artefacts_path: str = "backend/models"
+    model_artefacts_path: str = "models"
 
     # ------------------------------------------------------------------
     # Z-Sentinel — Risk weights (must sum to 1.0, validated below)

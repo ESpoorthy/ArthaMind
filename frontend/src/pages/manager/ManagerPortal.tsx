@@ -1,8 +1,334 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../store/authStore';
 import { ANALYTICS } from '../../data/mockData';
 import { Building2, LogOut, Users, Bot, Zap, ShieldAlert, TrendingUp } from 'lucide-react';
+import { apiClient } from '../../services/api';
+
+type SentinelEvent = {
+  transaction: { transaction_id: string; amount: number; currency: string; merchant_id: string };
+  assessment: {
+    transaction_id: string;
+    final_risk_score: number;
+    fraud_probability: number;
+    anomaly_score: number;
+    rule_risk: number;
+    ml_component: number;
+    anomaly_component: number;
+    rule_component: number;
+    confidence_score: number;
+    contributing_signals: string[];
+    reasoning: string;
+    model_version: string;
+    inference_mode: string;
+    correlation_id: string;
+    timestamp: string;
+  };
+  decision: { decision: string; recommended_action: string };
+};
+type SentinelSummary = {
+  transactions: number;
+  high_risk_events: number;
+  current_risk: number;
+  average_inference_ms: number;
+  model_version: string;
+  inference_mode: string;
+};
+type Impact = {
+  alternatives: Array<{
+    decision: string;
+    customer_friction: number;
+    review_workload: number;
+    assumption: string;
+  }>;
+};
+
+function ZSentinelDecisionCentre() {
+  const [events, setEvents] = useState<SentinelEvent[]>([]);
+  const [selected, setSelected] = useState<SentinelEvent | null>(null);
+  const [running, setRunning] = useState(false);
+  const [connection, setConnection] = useState<'CONNECTING' | 'LIVE' | 'DISCONNECTED'>(
+    'CONNECTING',
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [impact, setImpact] = useState<Impact | null>(null);
+  const [copilotAnswer, setCopilotAnswer] = useState<string | null>(null);
+  const [summary, setSummary] = useState({
+    transactions: 0,
+    high_risk_events: 0,
+    current_risk: 0,
+    average_inference_ms: 0,
+    model_version: 'Loading',
+    inference_mode: 'LOCAL',
+  });
+  const headers = { Authorization: `Bearer ${localStorage.getItem('access_token') ?? ''}` };
+  const refresh = () =>
+    apiClient
+      .get<SentinelSummary>('/sentinel/summary', { headers })
+      .then((r) => setSummary(r.data))
+      .catch(() => setError('Unable to load decision summary. Reconnect and try again.'));
+  useEffect(() => {
+    void refresh();
+    const token = localStorage.getItem('access_token');
+    const socket = new WebSocket(
+      `${import.meta.env.VITE_WS_BASE_URL ?? 'ws://localhost:8000'}/api/v1/sentinel/ws?token=${encodeURIComponent(token ?? '')}`,
+    );
+    socket.onopen = () => setConnection('LIVE');
+    socket.onerror = () => {
+      setConnection('DISCONNECTED');
+      setError('Live decision stream is unavailable.');
+    };
+    socket.onclose = () => setConnection('DISCONNECTED');
+    socket.onmessage = (m) => {
+      const e = JSON.parse(String(m.data)) as SentinelEvent;
+      setEvents((old) => [e, ...old].slice(0, 50));
+      setSelected(e);
+      void refresh();
+    };
+    return () => socket.close();
+  }, []);
+  const start = async () => {
+    setRunning(true);
+    try {
+      setError(null);
+      await apiClient.post(
+        '/sentinel/simulator/start',
+        { scenario: 'MULTI_SIGNAL_HIGH_RISK', event_count: 6, interval_ms: 500 },
+        { headers },
+      );
+    } catch {
+      setError('Unable to start the demo stream. Check your manager session.');
+    } finally {
+      window.setTimeout(() => setRunning(false), 3200);
+    }
+  };
+  const simulateImpact = async () => {
+    if (!selected) return;
+    try {
+      const response = await apiClient.get<Impact>(
+        `/sentinel/transactions/${selected.assessment.transaction_id}/impact`,
+        { headers },
+      );
+      setImpact(response.data);
+    } catch {
+      setError('Unable to load decision impact.');
+    }
+  };
+  const override = async (decision: string) => {
+    if (!selected) return;
+    const reason = window.prompt('Required analyst reason (minimum 8 characters):');
+    if (!reason) return;
+    try {
+      await apiClient.post(
+        `/sentinel/transactions/${selected.assessment.transaction_id}/override`,
+        { decision, reason },
+        { headers },
+      );
+      void refresh();
+    } catch {
+      setError('Override was rejected. Supply an authorised session and reason.');
+    }
+  };
+  const askCopilot = async () => {
+    if (!selected) return;
+    const question = window.prompt('Read-only investigation question:');
+    if (!question) return;
+    try {
+      const response = await apiClient.post<{ answer: string }>(
+        `/sentinel/transactions/${selected.assessment.transaction_id}/copilot`,
+        { question },
+        { headers },
+      );
+      setCopilotAnswer(response.data.answer);
+    } catch {
+      setError('Investigation Copilot is unavailable.');
+    }
+  };
+  const stats = [
+    ['LIVE TRANSACTIONS', String(summary.transactions)],
+    ['HIGH-RISK EVENTS', String(summary.high_risk_events)],
+    ['CURRENT RISK', `${Math.round(summary.current_risk * 100)}%`],
+    ['AVG INFERENCE', `${summary.average_inference_ms} ms`],
+    ['MODEL VERSION', summary.model_version],
+    ['INFERENCE MODE', summary.inference_mode],
+  ];
+  return (
+    <div className="space-y-5">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold">Z-SENTINEL DECISION CENTRE</h2>
+          <p className="text-sm text-gray-500">Real-time AI for critical financial decisions</p>
+        </div>
+        <button className="btn-primary" disabled={running} onClick={() => void start()}>
+          {running ? 'Streaming…' : 'Start deterministic demo'}
+        </button>
+      </div>
+      {error && (
+        <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
+        {stats.map(([l, v]) => (
+          <div key={l} className="bg-white rounded-xl border p-3">
+            <p className="text-[10px] text-gray-500">{l}</p>
+            <p className="font-bold truncate">{v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2 bg-white rounded-xl border overflow-hidden">
+          <p className="p-4 font-semibold border-b">
+            Live transactions{' '}
+            <span
+              className={connection === 'LIVE' ? 'text-green-600 text-xs' : 'text-gray-500 text-xs'}
+            >
+              ● {connection}
+            </span>
+          </p>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                {[
+                  'Transaction ID',
+                  'Amount',
+                  'Merchant',
+                  'Risk',
+                  'Confidence',
+                  'Decision',
+                  'Timestamp',
+                ].map((h) => (
+                  <th key={h} className="p-3 text-left text-xs text-gray-500">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {events.length === 0 ? (
+                <tr>
+                  <td className="p-8 text-center text-gray-500" colSpan={7}>
+                    Start the deterministic demo to receive live decisions.
+                  </td>
+                </tr>
+              ) : (
+                events.map((e) => (
+                  <tr
+                    key={`${e.assessment.transaction_id}-${e.assessment.timestamp}`}
+                    onClick={() => setSelected(e)}
+                    className="cursor-pointer hover:bg-blue-50 border-t"
+                  >
+                    <td className="p-3 font-mono text-xs">
+                      {e.assessment.transaction_id.slice(0, 8)}…
+                    </td>
+                    <td className="p-3">
+                      {e.transaction.currency} {e.transaction.amount.toLocaleString()}
+                    </td>
+                    <td className="p-3 text-xs">{e.transaction.merchant_id}</td>
+                    <td className="p-3 font-bold">
+                      {Math.round(e.assessment.final_risk_score * 100)}%
+                    </td>
+                    <td className="p-3">{Math.round(e.assessment.confidence_score * 100)}%</td>
+                    <td className="p-3 font-bold text-red-700">{e.decision.decision}</td>
+                    <td className="p-3 text-xs">
+                      {new Date(e.assessment.timestamp).toLocaleTimeString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="bg-white rounded-xl border p-5">
+          <h3 className="font-semibold">Decision detail</h3>
+          {selected ? (
+            <div className="space-y-3 mt-4 text-sm">
+              <p>
+                <b>Risk:</b> {Math.round(selected.assessment.final_risk_score * 100)}%
+              </p>
+              <p>
+                <b>Fraud probability:</b> {Math.round(selected.assessment.fraud_probability * 100)}%
+              </p>
+              <p>
+                <b>Anomaly:</b> {Math.round(selected.assessment.anomaly_score * 100)}%
+              </p>
+              <p>
+                <b>Rule risk:</b> {Math.round(selected.assessment.rule_risk * 100)}%
+              </p>
+              <div className="rounded-lg bg-gray-50 p-2 text-xs">
+                <b>Risk breakdown (weighted components)</b>
+                <p>
+                  ML: {Math.round(selected.assessment.ml_component * 100)}% · Anomaly:{' '}
+                  {Math.round(selected.assessment.anomaly_component * 100)}% · Rules:{' '}
+                  {Math.round(selected.assessment.rule_component * 100)}% · Final:{' '}
+                  {Math.round(selected.assessment.final_risk_score * 100)}%
+                </p>
+              </div>
+              <p>
+                <b>Confidence:</b> {Math.round(selected.assessment.confidence_score * 100)}%
+              </p>
+              <p>
+                <b>Signals:</b> {selected.assessment.contributing_signals.join(', ') || 'None'}
+              </p>
+              <p>
+                <b>Reasoning:</b> {selected.assessment.reasoning}
+              </p>
+              <p>
+                <b>Action:</b> {selected.decision.recommended_action}
+              </p>
+              <p>
+                <b>Model:</b> {selected.assessment.model_version} ·{' '}
+                {selected.assessment.inference_mode}
+              </p>
+              <p>
+                <b>Correlation:</b> {selected.assessment.correlation_id}
+              </p>
+              <p>
+                <b>Timestamp:</b> {new Date(selected.assessment.timestamp).toLocaleString()}
+              </p>
+              <button className="btn-secondary w-full" onClick={() => void simulateImpact()}>
+                Simulate decision impact
+              </button>
+              <button className="btn-secondary w-full" onClick={() => void askCopilot()}>
+                Ask Investigation Copilot
+              </button>
+              <div className="flex gap-2">
+                <button
+                  className="btn-secondary text-xs"
+                  onClick={() => void override('STEP_UP_AUTHENTICATION')}
+                >
+                  Override: step-up
+                </button>
+                <button className="btn-danger text-xs" onClick={() => void override('HOLD')}>
+                  Confirm hold
+                </button>
+              </div>
+              {impact && (
+                <div className="rounded-lg bg-gray-50 p-2 text-xs">
+                  <b>Transparent assumptions</b>
+                  {impact.alternatives.map((choice) => (
+                    <p key={choice.decision}>
+                      {choice.decision}: friction {choice.customer_friction}, review workload{' '}
+                      {choice.review_workload}. {choice.assumption}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {copilotAnswer && (
+                <div className="rounded-lg bg-blue-50 p-2 text-xs">
+                  <b>Read-only investigation</b>
+                  <p>{copilotAnswer}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="mt-4 text-gray-500 text-sm">Select a transaction.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Bar({
   label,
@@ -515,9 +841,16 @@ export default function ManagerPortal() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
   const a = ANALYTICS;
-  const [activeSection, setActiveSection] = useState<string>('Overview');
+  const [activeSection, setActiveSection] = useState<string>('Z-Sentinel');
 
-  const navItems = ['Overview', 'AI Performance', 'Fraud Alerts', 'Analytics', 'Live Activity'];
+  const navItems = [
+    'Z-Sentinel',
+    'Overview',
+    'AI Performance',
+    'Fraud Alerts',
+    'Analytics',
+    'Live Activity',
+  ];
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -566,6 +899,7 @@ export default function ManagerPortal() {
           <p className="text-gray-500 text-sm">Real-time AI performance and banking analytics</p>
         </div>
 
+        {activeSection === 'Z-Sentinel' && <ZSentinelDecisionCentre />}
         {activeSection === 'Overview' && <OverviewSection a={a} />}
         {activeSection === 'AI Performance' && <AIPerformanceSection />}
         {activeSection === 'Fraud Alerts' && <FraudAlertsSection a={a} />}

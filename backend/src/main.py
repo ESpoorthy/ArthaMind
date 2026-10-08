@@ -15,6 +15,7 @@ from src.middleware.error_handler import register_exception_handlers
 from src.middleware.rate_limit import RateLimitMiddleware
 from src.middleware.request_id import RequestIDMiddleware
 from src.routes import api_router
+from src.sentinel.pipeline import SentinelPipeline
 from src.utils.logger import get_logger
 
 logger = get_logger("main")
@@ -33,8 +34,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         settings.app_version,
         settings.environment,
     )
-    # Phase 2+ will initialise DB pool, Redis, ChromaDB here
+    app.state.sentinel = SentinelPipeline(settings)
+    await app.state.sentinel.start()
     yield
+    await app.state.sentinel.stop()
     logger.info("Shutting down %s", settings.app_name)
 
 
@@ -46,8 +49,8 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="ArthaMind API",
         description=(
-            "ArthaMind AI Banking Simulator — Agentic AI Banking Platform "
-            "built for SBI Hackathon 2026. Powered by Gemini 2.5 Flash and LangGraph."
+            "ArthaMind Z-Sentinel — Real-Time AI for Critical Financial Decisions. "
+            "Local simulation only; IBM Z inference requires a verified environment."
         ),
         version=settings.app_version,
         docs_url="/api/docs" if not settings.is_production else None,

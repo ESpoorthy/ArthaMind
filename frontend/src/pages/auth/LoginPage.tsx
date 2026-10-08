@@ -6,8 +6,8 @@ export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
 
-  const handle = (role: 'customer' | 'agent' | 'manager', path: string) => {
-    login(role);
+  const handle = async (role: 'customer' | 'agent' | 'manager', path: string) => {
+    await login(role);
     nav(path);
   };
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-bold text-white">ArthaMind</h1>
           <p className="text-blue-200 mt-1">Agentic AI Banking Simulator</p>
-          <p className="text-blue-300 text-xs mt-1">SBI Hackathon 2026</p>
+          <p className="text-blue-300 text-xs mt-1">Z-Sentinel competition demo</p>
         </div>
 
         {/* Demo Login Cards */}
@@ -31,7 +31,7 @@ export default function LoginPage() {
           </p>
           <div className="space-y-3">
             <button
-              onClick={() => handle('customer', '/dashboard')}
+              onClick={() => void handle('customer', '/dashboard')}
               className="w-full bg-white text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-blue-50 transition-all shadow font-medium"
             >
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -44,7 +44,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handle('agent', '/agent')}
+              onClick={() => void handle('agent', '/agent')}
               className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium"
             >
               <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
@@ -57,7 +57,7 @@ export default function LoginPage() {
             </button>
 
             <button
-              onClick={() => handle('manager', '/manager')}
+              onClick={() => void handle('manager', '/manager')}
               className="w-full bg-white/90 text-blue-900 rounded-xl p-4 flex items-center gap-4 hover:bg-white transition-all shadow font-medium"
             >
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">

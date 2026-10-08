@@ -1,0 +1,55 @@
+{
+  "model_version": "2.0.0-profiled",
+  "training_date": "2026-10-08T17:19:11Z",
+  "feature_names": [
+    "transaction_amount",
+    "historical_amount_baseline",
+    "amount_deviation_ratio",
+    "transaction_velocity_1h",
+    "transaction_velocity_24h",
+    "merchant_category_code",
+    "is_new_merchant",
+    "is_new_device",
+    "is_new_location",
+    "hour_of_day",
+    "days_since_last_transaction",
+    "balance_utilisation_ratio"
+  ],
+  "xgb_artefact": "xgboost_fraud_v2.0.0-profiled.joblib",
+  "iso_artefact": "isolation_forest_v2.0.0-profiled.joblib",
+  "scaler_artefact": "feature_scaler_v2.0.0-profiled.joblib",
+  "confidence_calibration_version": "platt-validation-v1",
+  "confidence_calibrator_artefact": "confidence_platt_v2.0.0-profiled.joblib",
+  "evaluation": {
+    "chronological_test": {
+      "precision": 0.2426,
+      "recall": 0.7416,
+      "f1": 0.3657,
+      "roc_auc": 0.8988,
+      "pr_auc": 0.5664
+    },
+    "validation_customer_separated": {
+      "precision": 0.2337,
+      "recall": 0.7907,
+      "f1": 0.3607,
+      "roc_auc": 0.8936,
+      "pr_auc": 0.5103
+    },
+    "test_customer_separated": {
+      "precision": 0.1859,
+      "recall": 0.7463,
+      "f1": 0.2976,
+      "roc_auc": 0.8707,
+      "pr_auc": 0.4461
+    },
+    "challenge_weak_combinations": {
+      "precision": 0.1418,
+      "recall": 0.6094,
+      "f1": 0.2301,
+      "roc_auc": 0.8099,
+      "pr_auc": 0.2334
+    },
+    "temporal_protocol": "Each profile computes baseline, counts and recency strictly from preceding events. Customer groups are disjoint.",
+    "seed": 20261008
+  }
+}
