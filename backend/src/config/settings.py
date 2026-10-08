@@ -6,7 +6,7 @@ All values are validated at startup — missing required vars raise an error imm
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -122,6 +122,77 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     demo_customer_password: str = "Demo@12345"
     seed_database: bool = True
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Inference
+    # ------------------------------------------------------------------
+    inference_provider: Literal["local", "ibmz"] = "local"
+    worker_batch_size: int = Field(default=1, ge=1)
+    model_artefacts_path: str = "backend/models"
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Risk weights (must sum to 1.0, validated below)
+    # ------------------------------------------------------------------
+    risk_weight_ml: float = Field(default=0.50, ge=0.0, le=1.0)
+    risk_weight_anomaly: float = Field(default=0.30, ge=0.0, le=1.0)
+    risk_weight_rules: float = Field(default=0.20, ge=0.0, le=1.0)
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Policy thresholds
+    # ------------------------------------------------------------------
+    decision_low_threshold: float = Field(default=0.30, ge=0.0, le=1.0)
+    decision_medium_threshold: float = Field(default=0.60, ge=0.0, le=1.0)
+    decision_high_threshold: float = Field(default=0.80, ge=0.0, le=1.0)
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Explanation mode
+    # ------------------------------------------------------------------
+    explanation_mode: Literal["gemini", "deterministic"] = "gemini"
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — IBM Z settings (optional, only needed for ibmz provider)
+    # ------------------------------------------------------------------
+    ibm_z_host: str = ""
+    ibm_z_port: int = 443
+    ibm_z_username: str = ""
+    ibm_z_password: str = ""
+    ibm_z_model_name: str = ""
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Decision Impact Simulator cost parameters
+    # ------------------------------------------------------------------
+    step_up_friction_cost: float = Field(default=1.00, ge=0.0)
+    customer_friction_value: float = Field(default=5.00, ge=0.0)
+
+    # ------------------------------------------------------------------
+    # Z-Sentinel — Sensitive log fields (never log these values)
+    # ------------------------------------------------------------------
+    sensitive_log_fields: list[str] = ["ibm_z_password", "gemini_api_key", "device_fingerprint"]
+
+    @model_validator(mode="after")
+    def _validate_z_sentinel(self) -> "Settings":
+        # 1. Risk weights must sum to 1.0 within floating-point tolerance
+        weight_sum = self.risk_weight_ml + self.risk_weight_anomaly + self.risk_weight_rules
+        if abs(weight_sum - 1.0) > 1e-9:
+            raise ValueError("RISK_WEIGHT_* values must sum to 1.0")
+
+        # 2. When using IBM Z provider, all five connection fields must be non-empty
+        if self.inference_provider == "ibmz":
+            ibm_z_fields = {
+                "ibm_z_host": self.ibm_z_host,
+                "ibm_z_username": self.ibm_z_username,
+                "ibm_z_password": self.ibm_z_password,
+                "ibm_z_model_name": self.ibm_z_model_name,
+            }
+            missing = [name for name, value in ibm_z_fields.items() if not value]
+            # ibm_z_port is an int with a sensible default (443), so only check the string fields
+            if missing:
+                raise ValueError(
+                    f"inference_provider is 'ibmz' but the following required fields are empty: "
+                    f"{', '.join(missing)}"
+                )
+
+        return self
 
     # ------------------------------------------------------------------
     # Derived helpers

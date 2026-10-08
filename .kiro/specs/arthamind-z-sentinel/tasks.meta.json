@@ -1,0 +1,507 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add missing ML and testing dependencies to `backend/requirements.txt`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914097
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439934136
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440138331
+      }
+    ],
+    "1.2 Extend `backend/src/config/settings.py` with all Z-Sentinel configuration fields": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914187
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439934251
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440139128
+      }
+    ],
+    "1.3 Create the async SQLAlchemy database layer": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914244
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440151663
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440667638
+      }
+    ],
+    "1.4 Create all six SQLAlchemy ORM models": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914304
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440151922
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440668185
+      }
+    ],
+    "1.5 Create Alembic migrations for all six new tables": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914359
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440690337
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791441119103
+      }
+    ],
+    "2.1 Create the synthetic data generator and model training script": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914423
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440690784
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791441119192
+      }
+    ],
+    "3. Checkpoint — ML artefacts in place": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914485
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791441127808
+      }
+    ],
+    "4.1 Create the `InferenceGateway` abstract interface and data classes": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914538
+      }
+    ],
+    "4.2 Implement `LocalInferenceProvider`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914589
+      }
+    ],
+    "4.3 Implement `IBMZInferenceProvider` stub": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914638
+      }
+    ],
+    "4.4 Create the `InferenceGateway` factory function": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914694
+      }
+    ],
+    "5.1 Implement `FeatureExtractor`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914769
+      }
+    ],
+    "6.1 Implement `RiskFusionEngine`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914820
+      }
+    ],
+    "7.1 Implement `PolicyEngine`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914872
+      }
+    ],
+    "8.1 Implement `DeterministicExplainer`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914922
+      }
+    ],
+    "8.2 Implement `GeminiExplainer` with injection-resistant prompt and output validation": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439914978
+      }
+    ],
+    "8.3 Implement `ExplanationLayer` orchestrator": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915036
+      }
+    ],
+    "9.1 Implement `DecisionImpactSimulator`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915090
+      }
+    ],
+    "10.1 Implement `AuditService`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915146
+      }
+    ],
+    "11.1 Create scenario configuration module": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915205
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440152156
+      },
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440668982
+      }
+    ],
+    "12. Checkpoint — Core pipeline services complete": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915272
+      }
+    ],
+    "13.1 Create the User model and authentication database table": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915339
+      }
+    ],
+    "13.2 Implement JWT utility functions": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915398
+      }
+    ],
+    "13.3 Implement auth route handlers": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915466
+      }
+    ],
+    "13.4 Update `authStore.tsx` and `api.ts` to use real JWT auth": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915582
+      }
+    ],
+    "13.5 Register auth router in `backend/src/routes/__init__.py`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915628
+      }
+    ],
+    "14.1 Create Redis connection pool and stream helpers": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915677
+      }
+    ],
+    "14.2 Implement the Pipeline orchestrator": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915729
+      }
+    ],
+    "14.3 Implement `BackgroundWorker`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915783
+      }
+    ],
+    "14.4 Register `BackgroundWorker` and Redis pool in the FastAPI `lifespan`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915835
+      }
+    ],
+    "15.1 Implement the WebSocket broadcaster": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915890
+      }
+    ],
+    "16.1 Implement the simulate endpoint": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439915946
+      }
+    ],
+    "16.2 Implement transaction list and assessment endpoints": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916000
+      }
+    ],
+    "16.3 Implement the override endpoint": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916057
+      }
+    ],
+    "16.4 Implement the impact simulation endpoint": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916115
+      }
+    ],
+    "16.5 Implement model health, metrics, and audit endpoints": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916167
+      }
+    ],
+    "16.6 Implement the AI Copilot endpoint": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916222
+      }
+    ],
+    "16.7 Register all sentinel routers in `backend/src/routes/__init__.py`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916274
+      }
+    ],
+    "17. Checkpoint — Full backend pipeline functional": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916330
+      }
+    ],
+    "18.1 Create TypeScript types for all Z-Sentinel domain objects": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916383
+      }
+    ],
+    "18.2 Create the Sentinel API service module": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916446
+      }
+    ],
+    "18.3 Create the `useSentinelWebSocket` custom hook": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439916930
+      }
+    ],
+    "19.1 Add the `/sentinel` route to `App.tsx`": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917125
+      }
+    ],
+    "19.2 Create `ZSentinelPage` — page shell, layout, and WebSocket initialisation": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917208
+      }
+    ],
+    "20.1 Create `ScenarioLauncher` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917298
+      }
+    ],
+    "20.2 Create `TransactionStreamFeed` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917396
+      }
+    ],
+    "21.1 Create `ContributingSignalsBar` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917529
+      }
+    ],
+    "21.2 Create `RiskAssessmentPanel` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917606
+      }
+    ],
+    "21.3 Create `DecisionActionBar` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917684
+      }
+    ],
+    "21.4 Create `ImpactSimulatorModal` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917776
+      }
+    ],
+    "21.5 Create `AICopilotPanel` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917860
+      }
+    ],
+    "22.1 Create `ModelHealthBadge` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439917952
+      }
+    ],
+    "22.2 Create `AuditTrailTable` component": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918038
+      }
+    ],
+    "23. Checkpoint — Full end-to-end flow working": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918113
+      }
+    ],
+    "24.1 Write backend integration tests for the full pipeline": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918205
+      }
+    ],
+    "25.1 Write deterministic demo scenario integration tests": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918284
+      }
+    ],
+    "26.1 Create the IBM Z integration guide": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918364
+      }
+    ],
+    "27. Final Checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791439918431
+      }
+    ],
+    "11. Demo Scenarios Configuration": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791440669497
+      }
+    ],
+    "1. Foundation — Dependencies, Settings, and Database Infrastructure": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791441119263
+      }
+    ],
+    "2. ML Training Pipeline": [
+      {
+        "executionId": "5ca59f0d-3c18-4192-a7a4-b83b0cdb3a4c",
+        "chatSessionId": "sess_70d67459-c418-4661-9e2c-8f17a9059c99",
+        "timestamp": 1791441119319
+      }
+    ]
+  }
+}
