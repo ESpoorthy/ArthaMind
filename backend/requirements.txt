@@ -24,7 +24,10 @@ google-generativeai==0.5.4
 langchain==0.1.20
 langchain-google-genai==1.0.3
 langchain-community==0.0.38
-langgraph==0.0.55
+# 0.0.55 requires langchain-core >=0.2, while the pinned LangChain 0.1 stack
+# intentionally uses langchain-core <0.2. 0.0.51 remains API-compatible and
+# supports the shared core range, keeping CI and Docker dependency resolution valid.
+langgraph==0.0.51
 chromadb==0.4.24
 
 # OCR
@@ -42,7 +45,8 @@ redis==5.0.4
 # Utilities
 python-dateutil==2.9.0
 pytz==2024.1
-uuid==1.30
+# uuid is provided by Python's standard library; there is no installable PyPI
+# distribution that supports the CI interpreter.
 
 # Testing
 pytest==8.1.1
