@@ -1,13 +1,20 @@
 """RiskAssessment ORM model."""
 
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.base import Base
+
+if TYPE_CHECKING:
+    from src.models.decision_override import DecisionOverride
+    from src.models.transaction import Transaction
 
 
 class RiskAssessment(Base):
@@ -16,9 +23,7 @@ class RiskAssessment(Base):
         CheckConstraint("risk_score >= 0.0 AND risk_score <= 1.0", name="ck_risk_score_range"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     transaction_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("transactions.id"), nullable=False, index=True
     )
@@ -44,9 +49,7 @@ class RiskAssessment(Base):
     )
 
     # Relationships
-    transaction: Mapped["Transaction"] = relationship(
-        "Transaction", back_populates="risk_assessment"
-    )
-    overrides: Mapped[list["DecisionOverride"]] = relationship(
+    transaction: Mapped[Transaction] = relationship("Transaction", back_populates="risk_assessment")
+    overrides: Mapped[list[DecisionOverride]] = relationship(
         "DecisionOverride", back_populates="risk_assessment"
     )
