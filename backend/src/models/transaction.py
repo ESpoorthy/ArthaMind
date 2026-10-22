@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import DateTime, Float, Integer, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -30,7 +30,7 @@ class Transaction(Base):
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=func.now(), index=True
     )
-    raw_features: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    raw_features: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     scenario_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # Relationship

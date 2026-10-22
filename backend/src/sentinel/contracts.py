@@ -1,4 +1,5 @@
 """Public, PII-minimised contracts for the Z-Sentinel decision path."""
+
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Annotated
@@ -30,6 +31,7 @@ class RiskLevel(str, Enum):
 
 class TransactionEvent(BaseModel):
     """An ingestion event; device and location fields are novelty indicators only."""
+
     model_config = ConfigDict(extra="forbid")
     transaction_id: str = Field(min_length=3, max_length=64)
     customer_id: str = Field(min_length=3, max_length=64)
@@ -56,7 +58,7 @@ class TransactionEvent(BaseModel):
 
 
 class RiskAssessment(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
     transaction_id: str
     fraud_probability: float = Field(ge=0, le=1)
     anomaly_score: float = Field(ge=0, le=1)
@@ -90,6 +92,8 @@ class DecisionResult(BaseModel):
 
 
 class AuditEvent(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     transaction_id: str
     timestamp: datetime
     model_version: str
@@ -112,9 +116,11 @@ class SimulatorRequest(BaseModel):
     event_count: int = Field(default=6, ge=1, le=50)
     interval_ms: int = Field(default=500, ge=0, le=10_000)
 
+
 class OverrideRequest(BaseModel):
     decision: Decision
     reason: str = Field(min_length=8, max_length=500)
+
 
 class ImpactSimulation(BaseModel):
     transaction_id: str
@@ -122,8 +128,27 @@ class ImpactSimulation(BaseModel):
     authoritative_risk_score: float
     alternatives: list[dict[str, str | float]]
 
+
 class CopilotQuestion(BaseModel):
-    question: str = Field(min_length=3, max_length=500)
+    question: str = Field(min_length=1, max_length=500)
+
+    @field_validator("question")
+    @classmethod
+    def question_must_contain_text(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("question must contain non-whitespace text")
+        return stripped
+
+
+class CompanionSimulationRequest(BaseModel):
+    scenario: Scenario
+
+
+class CompanionCaseRequest(BaseModel):
+    confirmed: bool
+    action: str = Field(pattern="^(REQUEST_VERIFICATION|PREPARE_SUPPORT_CASE)$")
+
 
 class CopilotResponse(BaseModel):
     transaction_id: str

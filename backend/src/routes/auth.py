@@ -1,9 +1,12 @@
 """Development-only demo login that establishes a signed server session token."""
+
 from fastapi import APIRouter, HTTPException
+
 from src.config.settings import get_settings
 from src.security import DemoLogin, issue_demo_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
 
 @router.post("/demo-login")
 async def demo_login(payload: DemoLogin) -> dict[str, str]:

@@ -23,6 +23,7 @@ ArthaMind is a full-stack banking simulator. **Z-Sentinel** is its transaction-r
 - [Technology stack](#technology-stack)
 - [Run locally](#run-locally)
 - [Demonstration walkthrough](#demonstration-walkthrough)
+- [Voice Concierge: Alexa+-style simulation](#voice-concierge-alexa-style-simulation)
 - [Quality checks and tests](#quality-checks-and-tests)
 - [Repository structure](#repository-structure)
 - [Limitations and responsible use](#limitations-and-responsible-use)
@@ -44,16 +45,16 @@ The system is designed to demonstrate the full decision path:
 
 ### At a glance
 
-| Area | Implementation |
-| --- | --- |
-| Primary use case | Explainable transaction-risk triage |
-| Data | Reproducibly generated synthetic transactions |
-| Risk signals | XGBoost probability, Isolation Forest anomaly score, deterministic rules |
-| Decision outputs | `APPROVE`, `STEP_UP_AUTHENTICATION`, `HOLD` |
-| Live updates | Redis Streams and WebSocket delivery |
-| Human oversight | JWT-authenticated manager access, reasoned overrides, audit events |
-| Local inference | Implemented |
-| IBM ML for z/OS | Integration boundary only; no live IBM Z deployment is claimed |
+| Area             | Implementation                                                           |
+| ---------------- | ------------------------------------------------------------------------ |
+| Primary use case | Explainable transaction-risk triage                                      |
+| Data             | Reproducibly generated synthetic transactions                            |
+| Risk signals     | XGBoost probability, Isolation Forest anomaly score, deterministic rules |
+| Decision outputs | `APPROVE`, `STEP_UP_AUTHENTICATION`, `HOLD`                              |
+| Live updates     | Redis Streams and WebSocket delivery                                     |
+| Human oversight  | JWT-authenticated manager access, reasoned overrides, audit events       |
+| Local inference  | Implemented                                                              |
+| IBM ML for z/OS  | Integration boundary only; no live IBM Z deployment is claimed           |
 
 ## Key capabilities
 
@@ -91,11 +92,11 @@ flowchart LR
 
 The default fusion weights are:
 
-| Component | Weight |
-| --- | ---: |
-| XGBoost model probability | 0.50 |
-| Isolation Forest anomaly score | 0.30 |
-| Deterministic rule signal | 0.20 |
+| Component                      | Weight |
+| ------------------------------ | -----: |
+| XGBoost model probability      |   0.50 |
+| Isolation Forest anomaly score |   0.30 |
+| Deterministic rule signal      |   0.20 |
 
 The weighted signals form the fused risk score. The policy engine uses the configured thresholds to classify risk and determine the authoritative action. The interface can present explanations and comparisons, but the language model cannot change the score, confidence, thresholds, or final policy decision.
 
@@ -122,30 +123,30 @@ The local model is an **engineering demonstration model**, not a validated banki
 
 The documented v2.0.0-profiled evaluation at threshold 0.35 reports:
 
-| Synthetic evaluation split | Precision | Recall | F1 | ROC-AUC | PR-AUC |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Chronological last-events | 0.2426 | 0.7416 | 0.3657 | 0.8988 | 0.5664 |
-| Validation customers | 0.2337 | 0.7907 | 0.3607 | 0.8936 | 0.5103 |
-| Test customers | 0.1859 | 0.7463 | 0.2976 | 0.8707 | 0.4461 |
-| Weak-combination challenge | 0.1418 | 0.6094 | 0.2301 | 0.8099 | 0.2334 |
+| Synthetic evaluation split | Precision | Recall |     F1 | ROC-AUC | PR-AUC |
+| -------------------------- | --------: | -----: | -----: | ------: | -----: |
+| Chronological last-events  |    0.2426 | 0.7416 | 0.3657 |  0.8988 | 0.5664 |
+| Validation customers       |    0.2337 | 0.7907 | 0.3607 |  0.8936 | 0.5103 |
+| Test customers             |    0.1859 | 0.7463 | 0.2976 |  0.8707 | 0.4461 |
+| Weak-combination challenge |    0.1418 | 0.6094 | 0.2301 |  0.8099 | 0.2334 |
 
 These values are **synthetic engineering metrics only**. Precision remains limited, and the values must not be presented as production banking performance. Real-world use would require appropriately governed financial data, rigorous temporal and customer-separated validation, calibration, drift monitoring, operational controls, and independent review.
 
 ## Technology stack
 
-| Layer | Technologies |
-| --- | --- |
-| Frontend | React, TypeScript, Vite |
-| API | Python, FastAPI, Pydantic |
-| Local ML | XGBoost, scikit-learn, Isolation Forest |
-| Risk orchestration | Feature extraction, risk fusion, deterministic policy engine |
-| Explanations | Gemini integration with deterministic fallback |
-| Event delivery | Redis Streams, WebSockets |
-| Persistence | PostgreSQL |
-| Retrieval infrastructure | ChromaDB |
-| Authentication | Signed JWTs and role-based access control |
-| Testing and quality | pytest, Vitest, ESLint, TypeScript, Black, isort, flake8, mypy |
-| Environment | Docker Compose, GitHub Actions |
+| Layer                    | Technologies                                                   |
+| ------------------------ | -------------------------------------------------------------- |
+| Frontend                 | React, TypeScript, Vite                                        |
+| API                      | Python, FastAPI, Pydantic                                      |
+| Local ML                 | XGBoost, scikit-learn, Isolation Forest                        |
+| Risk orchestration       | Feature extraction, risk fusion, deterministic policy engine   |
+| Explanations             | Gemini integration with deterministic fallback                 |
+| Event delivery           | Redis Streams, WebSockets                                      |
+| Persistence              | PostgreSQL                                                     |
+| Retrieval infrastructure | ChromaDB                                                       |
+| Authentication           | Signed JWTs and role-based access control                      |
+| Testing and quality      | pytest, Vitest, ESLint, TypeScript, Black, isort, flake8, mypy |
+| Environment              | Docker Compose, GitHub Actions                                 |
 
 ## Run locally
 
@@ -190,10 +191,10 @@ docker compose up --build
 
 Wait for the services to start and report healthy status. The first run may take time while Docker downloads images and builds containers.
 
-| Service | Local URL |
-| --- | --- |
-| Frontend | [http://localhost:5173](http://localhost:5173) |
-| Backend API | [http://localhost:8000](http://localhost:8000) |
+| Service                                          | Local URL                                                        |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| Frontend                                         | [http://localhost:5173](http://localhost:5173)                   |
+| Backend API                                      | [http://localhost:8000](http://localhost:8000)                   |
 | Interactive API documentation (development mode) | [http://localhost:8000/api/docs](http://localhost:8000/api/docs) |
 
 To stop the containers while preserving local volumes:
@@ -220,6 +221,48 @@ Use a configured manager account in the simulator.
 6. Inspect the audit trail to review the recorded decision and human action.
 
 All demonstration transactions are synthetic. Use the actual result displayed by the running system rather than assuming that every scenario will produce the same score across model or configuration changes.
+
+## Voice Concierge: Alexa+-style simulation
+
+The customer portal includes **ArthaMind Voice Concierge**, a text-based conversational simulation for explaining synthetic transaction assessments. It submits the `NORMAL` or `MULTI_SIGNAL_HIGH_RISK` example to the existing Z-Sentinel inference, risk fusion, deterministic policy, and explanation pipeline. The API returns the completed transaction, assessment, and decision; read-only explanations use saved assessment fields. The interface reports unavailable or missing data as an error rather than inventing an answer.
+
+Only the signed-in demo customer can run these companion scenarios. Explanation and next-step endpoints check transaction ownership. Requesting additional verification or preparing a support case requires explicit confirmation and records a `SIMULATED_ONLY` action. These actions do not contact a bank, move money, or change policy decisions. Manager overrides remain in the existing role-protected Z-Sentinel workflow.
+
+This is an **Alexa+-style simulation for the Amazon Developer Hackathon**, not an Alexa+ device or partner-preview integration. No Alexa SDK, Amazon production service, or live banking connection is implemented. The local model output is distinct from the deterministic policy decision. In a fresh checkout, trained `.joblib` weights may be absent because they are git-ignored; the backend then uses its reproducible synthetic bootstrap model and labels it `bootstrap-rf-1`. Without configured services, result ownership and simulated action records live in process memory and are lost on restart. PostgreSQL persistence is best-effort when configured and available.
+
+### Run the text companion locally without Docker
+
+Install Node.js 20+, npm, and Python 3.11. From the repository root:
+
+```bash
+cp .env.example .env
+npm ci --legacy-peer-deps
+cd backend
+python3.11 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+Start the backend in terminal 1:
+
+```bash
+cd backend
+set -a
+. ../.env
+set +a
+. .venv/bin/activate
+uvicorn src.main:app --reload --port 8000
+```
+
+Start the frontend in terminal 2 from the repository root:
+
+```bash
+npm run dev:frontend
+```
+
+Open `http://localhost:5173`, choose **Customer Portal**, then **Voice Concierge**. Use the configured simulator demo password (`DEMO_CUSTOMER_PASSWORD`, default `Demo@12345`). The concise companion does not require Gemini credentials or Docker. Do not use example credentials for a network-accessible deployment; `.env` is ignored by Git and real secrets must not be committed.
+
+See [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for the exact walkthrough and [`docs/AMAZON_HACKATHON_SUBMISSION.md`](docs/AMAZON_HACKATHON_SUBMISSION.md) for the submission draft and fields requiring truthful human input.
 
 ## Quality checks and tests
 

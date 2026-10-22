@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 
 import {
   Building2,
@@ -8,6 +8,7 @@ import {
   Landmark,
   PiggyBank,
   MessageSquare,
+  Headphones,
   Bell,
   LogOut,
   Wallet,
@@ -27,6 +28,7 @@ const NAV = [
   { to: '/dashboard/loans', label: 'Loans', icon: Landmark },
   { to: '/dashboard/fd', label: 'Fixed Deposits', icon: PiggyBank },
   { to: '/dashboard/chat', label: 'AI Assistant', icon: MessageSquare },
+  { to: '/dashboard/concierge', label: 'Voice Concierge', icon: Headphones },
   { to: '/dashboard/rewards', label: 'Rewards', icon: Trophy },
   { to: '/dashboard/life-events', label: 'Life Events', icon: Sparkles },
   { to: '/dashboard/insights', label: 'AI Insights', icon: Brain },
@@ -63,7 +65,7 @@ export default function CustomerLayout() {
               key={to}
               to={to}
               end={to === '/dashboard'}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                   isActive
                     ? 'bg-white text-blue-900 font-semibold'

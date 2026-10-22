@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 import { ANALYTICS } from '../../data/mockData';
 import { Building2, LogOut, Users, Bot, Zap, ShieldAlert, TrendingUp } from 'lucide-react';
 import { apiClient } from '../../services/api';
@@ -62,11 +62,14 @@ function ZSentinelDecisionCentre() {
     inference_mode: 'LOCAL',
   });
   const headers = { Authorization: `Bearer ${localStorage.getItem('access_token') ?? ''}` };
-  const refresh = () =>
-    apiClient
-      .get<SentinelSummary>('/sentinel/summary', { headers })
-      .then((r) => setSummary(r.data))
-      .catch(() => setError('Unable to load decision summary. Reconnect and try again.'));
+  const refresh = useCallback(
+    () =>
+      apiClient
+        .get<SentinelSummary>('/sentinel/summary')
+        .then((r) => setSummary(r.data))
+        .catch(() => setError('Unable to load decision summary. Reconnect and try again.')),
+    [],
+  );
   useEffect(() => {
     void refresh();
     const token = localStorage.getItem('access_token');
@@ -86,7 +89,7 @@ function ZSentinelDecisionCentre() {
       void refresh();
     };
     return () => socket.close();
-  }, []);
+  }, [refresh]);
   const start = async () => {
     setRunning(true);
     try {

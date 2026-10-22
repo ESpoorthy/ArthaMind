@@ -37,7 +37,7 @@ class ScenarioConfig:
     expected_decision: str  # APPROVE / STEP_UP_AUTH / HOLD
 
 
-SCENARIO_CONFIGS: Final[types.MappingProxyType] = types.MappingProxyType(
+SCENARIO_CONFIGS: Final[types.MappingProxyType[str, ScenarioConfig]] = types.MappingProxyType(
     {
         "NORMAL_PURCHASE": ScenarioConfig(
             amount=85.00,
@@ -157,4 +157,4 @@ SCENARIO_CONFIGS: Final[types.MappingProxyType] = types.MappingProxyType(
 )
 
 # Valid scenario keys — used for input validation
-VALID_SCENARIO_KEYS: Final[frozenset] = frozenset(SCENARIO_CONFIGS.keys())
+VALID_SCENARIO_KEYS: Final[frozenset[str]] = frozenset(SCENARIO_CONFIGS.keys())

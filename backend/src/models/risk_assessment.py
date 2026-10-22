@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -33,7 +33,7 @@ class RiskAssessment(Base):
     anomaly_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     rule_risk: Mapped[float | None] = mapped_column(Float, nullable=True)
     confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
-    contributing_signals: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    contributing_signals: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
     plain_language_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
     recommended_action: Mapped[str] = mapped_column(String(32), nullable=False)

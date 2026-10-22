@@ -13,6 +13,7 @@ from typing import Any
 
 import joblib
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
@@ -72,25 +73,67 @@ class LocalInferenceProvider(InferenceProvider):
         )
         if metadata:
             values = json.loads(metadata.read_text())
-            self.model_version = str(values["model_version"])
-            self.model = joblib.load(self.path / values["xgb_artefact"])
-            self.anomaly = joblib.load(self.path / values["iso_artefact"])
-            self.scaler = joblib.load(self.path / values["scaler_artefact"])
-            if values.get("confidence_calibrator_artefact"):
-                self.calibrator = joblib.load(self.path / values["confidence_calibrator_artefact"])
-                self.confidence_calibration_version = str(
-                    values.get("confidence_calibration_version", "platt-validation-v1")
-                )
-            return
-        # A small reproducible supervised bootstrap keeps local demo functional
-        # before training artefacts exist.
+            required_artifacts = [
+                values["xgb_artefact"],
+                values["iso_artefact"],
+                values["scaler_artefact"],
+            ]
+            calibrator_artifact = values.get("confidence_calibrator_artefact")
+            if calibrator_artifact:
+                required_artifacts.append(calibrator_artifact)
+            if all((self.path / artifact).is_file() for artifact in required_artifacts):
+                self.model_version = str(values["model_version"])
+                self.model = joblib.load(self.path / values["xgb_artefact"])
+                self.anomaly = joblib.load(self.path / values["iso_artefact"])
+                self.scaler = joblib.load(self.path / values["scaler_artefact"])
+                if calibrator_artifact:
+                    self.calibrator = joblib.load(self.path / calibrator_artifact)
+                    self.confidence_calibration_version = str(
+                        values.get("confidence_calibration_version", "platt-validation-v1")
+                    )
+                return
+        # A small reproducible synthetic bootstrap keeps local scoring functional
+        # before the optional trained model artefacts are available. Its rows use
+        # the same value ranges as extract(), so ordinary demo events stay ordinary.
         rng = np.random.default_rng(42)
-        normal = rng.normal(0, 1, (2500, 12))
-        fraud = rng.normal(0, 1, (500, 12))
-        fraud[:, 0] += 5
-        fraud[:, 2] += 5
-        fraud[:, 3] += 4
-        fraud[:, 6:9] += 2
+
+        def synthetic_rows(count: int, anomalous: bool) -> NDArray[np.float64]:
+            baseline = rng.uniform(100, 500, count)
+            amount_ratio = (
+                rng.uniform(3, 20, count)
+                if anomalous
+                else np.clip(rng.lognormal(0, 0.3, count), 0.2, 3)
+            )
+            amount = baseline * amount_ratio
+            velocity = rng.integers(4, 10, count) if anomalous else rng.poisson(1, count).clip(0, 4)
+            merchant_novelty = rng.binomial(1, 0.65 if anomalous else 0.04, count)
+            device_novelty = rng.binomial(1, 0.55 if anomalous else 0.02, count)
+            location_novelty = rng.binomial(1, 0.55 if anomalous else 0.03, count)
+            hours = rng.integers(0, 6, count) if anomalous else rng.integers(6, 23, count)
+            recency_days = (
+                rng.uniform(0.0004, 0.1, count) if anomalous else rng.uniform(0.1, 3, count)
+            )
+            utilization = np.clip(amount / 10_000, 0, 0.999)
+            category = rng.choice([5411, 5812, 5999, 5944, 6011], count)
+            return np.column_stack(
+                (
+                    amount,
+                    baseline,
+                    amount_ratio,
+                    velocity,
+                    np.maximum(1, velocity * 2),
+                    category,
+                    merchant_novelty,
+                    device_novelty,
+                    location_novelty,
+                    hours,
+                    recency_days,
+                    utilization,
+                )
+            )
+
+        normal = synthetic_rows(2500, anomalous=False)
+        fraud = synthetic_rows(500, anomalous=True)
         X = np.vstack([normal, fraud])
         y = np.r_[np.zeros(len(normal)), np.ones(len(fraud))]
         self.scaler = StandardScaler().fit(X)
@@ -174,7 +217,10 @@ class EventBus:
         try:
             import redis.asyncio as redis
 
-            self.redis = redis.from_url(self.redis_url, decode_responses=True)
+            self.redis = redis.from_url(  # type: ignore[no-untyped-call]
+                self.redis_url,
+                decode_responses=True,
+            )
             await self.redis.ping()
         except Exception:
             self.redis = None
@@ -276,6 +322,8 @@ class SentinelPipeline:
         self.audit: list[AuditEvent] = []
         self.results: dict[str, tuple[RiskAssessment, DecisionResult]] = {}
         self.overrides: list[dict[str, str]] = []
+        self.companion_owners: dict[str, str] = {}
+        self.companion_cases: list[dict[str, str]] = []
         self.latencies: dict[str, list[float]] = defaultdict(list)
         self._dedupe_lock = asyncio.Lock()
         self.tasks: set[asyncio.Task[None]] = set()

@@ -13,6 +13,7 @@ import Insights from './Insights';
 import FraudAwareness from './FraudAwareness';
 import BillAutopay from './BillAutopay';
 import PrivacyControls from './PrivacyControls';
+import VoiceConcierge from './VoiceConcierge';
 
 export default function CustomerPortal() {
   return (
@@ -24,6 +25,7 @@ export default function CustomerPortal() {
         <Route path="loans" element={<Loans />} />
         <Route path="fd" element={<FixedDeposits />} />
         <Route path="chat" element={<AIChat />} />
+        <Route path="concierge" element={<VoiceConcierge />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="rewards" element={<Rewards />} />
         <Route path="life-events" element={<LifeEvents />} />

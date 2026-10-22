@@ -1,7 +1,7 @@
 """Minimal JWT authentication for the existing demo portals and Z-Sentinel APIs."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, cast
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -21,15 +21,18 @@ class DemoLogin(BaseModel):
 def issue_demo_token(role: str) -> str:
     settings = get_settings()
     now = datetime.now(timezone.utc)
-    return jwt.encode(
-        {
-            "sub": f"demo-{role}",
-            "role": role,
-            "iat": now,
-            "exp": now + timedelta(minutes=settings.access_token_expire_minutes),
-        },
-        settings.secret_key,
-        algorithm=settings.algorithm,
+    return cast(
+        str,
+        jwt.encode(
+            {
+                "sub": f"demo-{role}",
+                "role": role,
+                "iat": now,
+                "exp": now + timedelta(minutes=settings.access_token_expire_minutes),
+            },
+            settings.secret_key,
+            algorithm=settings.algorithm,
+        ),
     )
 
 
@@ -58,4 +61,12 @@ async def require_manager(
 ) -> dict[str, str]:
     if identity["role"] != "manager":
         raise HTTPException(status_code=403, detail="Manager role required")
+    return identity
+
+
+async def require_demo_customer(
+    identity: Annotated[dict[str, str], Depends(current_identity)],
+) -> dict[str, str]:
+    if identity["role"] != "customer" or identity["sub"] != "demo-customer":
+        raise HTTPException(status_code=403, detail="Demo customer role required")
     return identity

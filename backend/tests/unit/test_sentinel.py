@@ -51,10 +51,11 @@ def test_multi_signal_produces_hold_and_audit():
 
     async def execute():
         await pipeline.submit(scenario_event(Scenario.MULTI_SIGNAL_HIGH_RISK, 1), "correlation")
-        await asyncio.sleep(0.1)
+        await asyncio.gather(*pipeline.tasks)
 
     asyncio.run(execute())
     assessment, decision = next(iter(pipeline.results.values()))
+    assert assessment.model_version == "bootstrap-rf-1"
     assert assessment.risk_level.value in {"HIGH", "CRITICAL"}
     assert decision.decision.value == "HOLD"
     assert pipeline.audit[0].transaction_id == assessment.transaction_id
@@ -167,6 +168,115 @@ def test_copilot_is_read_only_and_rejects_prompt_injection():
     assert response.source == "DETERMINISTIC_READ_ONLY_FALLBACK"
     assert "cannot alter" in response.answer
     assert decision.decision.value == "HOLD"
+
+
+def test_customer_companion_uses_real_assessment_and_checks_actions():
+    with TestClient(app) as client:
+        customer = {"Authorization": f"Bearer {issue_demo_token('customer')}"}
+        manager = MANAGER_HEADERS
+        run = client.post(
+            "/api/v1/sentinel/companion/simulate",
+            headers=customer,
+            json={"scenario": "MULTI_SIGNAL_HIGH_RISK"},
+        )
+        assert run.status_code == 200
+        actual = run.json()
+        transaction_id = actual["assessment"]["transaction_id"]
+        assert actual["decision"]["decision"] == "HOLD"
+        assert actual["assessment"]["risk_level"] in {"HIGH", "CRITICAL"}
+        explanation = client.post(
+            f"/api/v1/sentinel/companion/transactions/{transaction_id}/explain",
+            headers=customer,
+            json={"question": "Why was this transaction put on hold?"},
+        )
+        assert explanation.status_code == 200
+        answer = explanation.json()["answer"]
+        assert actual["assessment"]["risk_level"] in answer
+        assert actual["decision"]["decision"] in answer
+        assert ", ".join(actual["assessment"]["contributing_signals"]) in answer
+        assert explanation.json()["source"] == "DETERMINISTIC_READ_ONLY_FALLBACK"
+        missing_confirmation = client.post(
+            f"/api/v1/sentinel/companion/transactions/{transaction_id}/next-step",
+            headers=customer,
+            json={"action": "PREPARE_SUPPORT_CASE", "confirmed": False},
+        )
+        assert missing_confirmation.status_code == 400
+        confirmed = client.post(
+            f"/api/v1/sentinel/companion/transactions/{transaction_id}/next-step",
+            headers=customer,
+            json={"action": "PREPARE_SUPPORT_CASE", "confirmed": True},
+        )
+        assert confirmed.status_code == 200
+        assert confirmed.json()["status"] == "SIMULATED_ONLY"
+        assert (
+            client.post(
+                "/api/v1/sentinel/companion/simulate",
+                headers=manager,
+                json={"scenario": "NORMAL"},
+            ).status_code
+            == 403
+        )
+
+
+def test_customer_companion_explains_normal_and_handles_bad_input():
+    with TestClient(app) as client:
+        customer = {"Authorization": f"Bearer {issue_demo_token('customer')}"}
+        normal = client.post(
+            "/api/v1/sentinel/companion/simulate",
+            headers=customer,
+            json={"scenario": "NORMAL"},
+        )
+        assert normal.status_code == 200
+        data = normal.json()
+        assert data["decision"]["decision"] == "APPROVE"
+        transaction_id = data["assessment"]["transaction_id"]
+        explanation = client.post(
+            f"/api/v1/sentinel/companion/transactions/{transaction_id}/explain",
+            headers=customer,
+            json={"question": "Explain the decision"},
+        )
+        assert explanation.status_code == 200
+        assert "APPROVE" in explanation.json()["answer"]
+        assert (
+            client.post(
+                f"/api/v1/sentinel/companion/transactions/{transaction_id}/explain",
+                headers=customer,
+                json={"question": "   "},
+            ).status_code
+            == 422
+        )
+        assert (
+            client.post(
+                "/api/v1/sentinel/companion/simulate",
+                headers=customer,
+                json={"scenario": "NEW_DEVICE"},
+            ).status_code
+            == 422
+        )
+
+
+def test_companion_transaction_is_not_readable_by_another_role_or_unknown_id():
+    with TestClient(app) as client:
+        customer = {"Authorization": f"Bearer {issue_demo_token('customer')}"}
+        agent = {"Authorization": f"Bearer {issue_demo_token('agent')}"}
+        response = client.post(
+            "/api/v1/sentinel/companion/simulate",
+            headers=customer,
+            json={"scenario": "NORMAL"},
+        )
+        transaction_id = response.json()["assessment"]["transaction_id"]
+        path = f"/api/v1/sentinel/companion/transactions/{transaction_id}/explain"
+        assert (
+            client.post(path, headers=agent, json={"question": "Why approved?"}).status_code == 403
+        )
+        assert (
+            client.post(
+                "/api/v1/sentinel/companion/transactions/not-owned/explain",
+                headers=customer,
+                json={"question": "Why approved?"},
+            ).status_code
+            == 404
+        )
 
 
 def test_ibm_provider_fails_safely_without_configuration():
