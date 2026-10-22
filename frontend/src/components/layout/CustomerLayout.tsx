@@ -65,7 +65,7 @@ export default function CustomerLayout() {
               key={to}
               to={to}
               end={to === '/dashboard'}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                   isActive
                     ? 'bg-white text-blue-900 font-semibold'
