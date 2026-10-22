@@ -11,6 +11,8 @@ ArthaMind is a full-stack banking simulator. **Z-Sentinel** is its transaction-r
 
 > **Project scope:** Demonstration and engineering prototype using synthetic transaction data. It is not a production fraud-detection service, does not connect to real banking systems, and does not move money.
 
+**Demo video:** [Watch the ArthaMind Voice Concierge demo](https://drive.google.com/file/d/1L6PkNnM1dL7v3YRZ-tqiU-YhMpQaiO3W/view?usp=sharing)
+
 ---
 
 ## Contents
