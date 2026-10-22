@@ -76,13 +76,13 @@ checkout therefore uses the existing seeded synthetic bootstrap model, reported 
 
 ## Setup and demo
 
-Follow [README setup and run instructions](../README.md#9-setup-and-run), then use the
+Follow [README setup and run instructions](../README.md#run-locally), then use the
 three-minute sequence in [DEMO_SCRIPT.md](DEMO_SCRIPT.md). No Gemini key, Amazon account,
 partner preview, or cloud deployment is required for the local simulated experience.
 
 ## Tests
 
-Use the CI commands documented in [README tests and checks](../README.md#10-tests-and-checks).
+Use the CI commands documented in [README tests and checks](../README.md#quality-checks-and-tests).
 The added backend integration tests verify the normal approval and multi-signal hold paths,
 assessment-grounded explanations, role restrictions, transaction ownership, invalid input,
 and confirmation requirements. Frontend tests cover API-driven results and error feedback.
