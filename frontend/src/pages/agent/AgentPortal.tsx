@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 import { SUPPORT_TICKETS } from '../../data/mockData';
 import { Building2, LogOut, CheckCircle } from 'lucide-react';
 

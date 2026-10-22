@@ -14,9 +14,7 @@ class MLModel(Base):
     __tablename__ = "ml_models"
     __table_args__ = (UniqueConstraint("model_version", name="uq_ml_model_version"),)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     model_name: Mapped[str] = mapped_column(String(64), nullable=False)
     model_version: Mapped[str] = mapped_column(String(32), nullable=False)
     training_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

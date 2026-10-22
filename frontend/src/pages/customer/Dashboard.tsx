@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 import { ACCOUNTS, TRANSACTIONS, LOANS, FIXED_DEPOSITS } from '../../data/mockData';
 import { Wallet, CreditCard, Landmark, PiggyBank, TrendingUp, TrendingDown } from 'lucide-react';
 

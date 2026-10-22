@@ -8,8 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSo
 from jose import JWTError, jwt
 
 from src.config.settings import get_settings
-from src.security import require_manager
+from src.security import require_demo_customer, require_manager
 from src.sentinel.contracts import (
+    CompanionCaseRequest,
+    CompanionSimulationRequest,
     CopilotQuestion,
     CopilotResponse,
     ImpactSimulation,
@@ -22,6 +24,74 @@ from src.sentinel.copilot import investigate
 from src.sentinel.pipeline import SentinelPipeline
 
 router = APIRouter(prefix="/sentinel", tags=["Z-Sentinel"])
+
+
+def require_case_owner(pipeline: SentinelPipeline, transaction_id: str, subject: str) -> None:
+    if pipeline.companion_owners.get(transaction_id) != subject:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+
+@router.post("/companion/simulate")
+async def companion_simulate(
+    payload: CompanionSimulationRequest,
+    request: Request,
+    identity: dict[str, str] = Depends(require_demo_customer),
+) -> dict[str, object]:
+    if payload.scenario not in {Scenario.NORMAL, Scenario.MULTI_SIGNAL_HIGH_RISK}:
+        raise HTTPException(
+            status_code=422,
+            detail="Scenario is not available in the companion demo",
+        )
+    pipeline = get_pipeline(request)
+    correlation_id = str(uuid.uuid4())
+    event = scenario_event(payload.scenario, 0).model_copy(
+        update={"transaction_id": str(uuid.uuid4())}
+    )
+    await pipeline.process(event, correlation_id)
+    result = pipeline.results.get(event.transaction_id)
+    if not result:
+        raise HTTPException(status_code=503, detail="Risk assessment could not be completed")
+    assessment, decision = result
+    pipeline.companion_owners[event.transaction_id] = identity["sub"]
+    return {"transaction": event, "assessment": assessment, "decision": decision}
+
+
+@router.post("/companion/transactions/{transaction_id}/explain", response_model=CopilotResponse)
+async def companion_explain(
+    transaction_id: str,
+    payload: CopilotQuestion,
+    request: Request,
+    identity: dict[str, str] = Depends(require_demo_customer),
+) -> CopilotResponse:
+    pipeline = get_pipeline(request)
+    require_case_owner(pipeline, transaction_id, identity["sub"])
+    result = pipeline.results.get(transaction_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    assessment, decision = result
+    return investigate(payload.question, assessment, decision)
+
+
+@router.post("/companion/transactions/{transaction_id}/next-step")
+async def companion_next_step(
+    transaction_id: str,
+    payload: CompanionCaseRequest,
+    request: Request,
+    identity: dict[str, str] = Depends(require_demo_customer),
+) -> dict[str, str]:
+    pipeline = get_pipeline(request)
+    require_case_owner(pipeline, transaction_id, identity["sub"])
+    if not payload.confirmed:
+        raise HTTPException(status_code=400, detail="Confirm the simulated action first")
+    case = {
+        "case_id": str(uuid.uuid4()),
+        "transaction_id": transaction_id,
+        "customer": identity["sub"],
+        "action": payload.action,
+        "status": "SIMULATED_ONLY",
+    }
+    pipeline.companion_cases.append(case)
+    return case
 
 
 def get_pipeline(request: Request) -> SentinelPipeline:

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 import { AI_RESPONSES } from '../../data/mockData';
 import { Send, Mic, Bot, User } from 'lucide-react';
 

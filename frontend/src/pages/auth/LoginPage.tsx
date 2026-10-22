@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authStore';
+import { useAuth } from '../../store/useAuth';
 import { Building2, UserCircle, Headphones, BarChart3 } from 'lucide-react';
 
 export default function LoginPage() {
