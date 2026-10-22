@@ -21,7 +21,6 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-bold text-white">ArthaMind</h1>
           <p className="text-blue-200 mt-1">Agentic AI Banking Simulator</p>
-          <p className="text-blue-300 text-xs mt-1">Z-Sentinel competition demo</p>
         </div>
 
         {/* Demo Login Cards */}
